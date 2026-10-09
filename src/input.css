@@ -1,0 +1,823 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Stella Group — maxsus uslublar
+   O'zgartirgandan keyin:  npm run build
+   ============================================================ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5.5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-brand-700 font-sans text-white antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background: rgba(180, 140, 255, 0.5);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid theme('colors.neon.300');
+    outline-offset: 3px;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  /* Saqlangan til ruscha bo'lsa, matn almashguncha sahifa miltillamasligi uchun */
+  html.i18n-pending body {
+    visibility: hidden;
+  }
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+}
+
+@layer components {
+  .container-site {
+    @apply mx-auto w-full max-w-site px-5 sm:px-8;
+  }
+
+  /* ---------- Sarlavhalar ---------- */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 font-display text-xs font-bold uppercase text-neon-300;
+    letter-spacing: 0.18em;
+  }
+  .eyebrow svg {
+    @apply h-3.5 w-3.5 shrink-0;
+    color: var(--star-ink);
+    filter: drop-shadow(0 0 6px rgba(255, 210, 63, 0.7));
+  }
+  .section-title {
+    @apply mt-4 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl lg:text-[2.75rem];
+  }
+  /* sarlavha ichida alohida qatorda, kattaroq ko'rinadigan urg'u */
+  .about-accent {
+    @apply mt-2 block text-[1.2em] leading-[1.05];
+  }
+  .section-sub {
+    @apply mt-4 max-w-2xl text-base leading-relaxed text-brand-100/80 sm:text-lg;
+  }
+
+  .hero-title {
+    @apply font-extrabold tracking-tight;
+    font-size: clamp(1.8rem, 7.6vw, 2.9rem);
+    line-height: 1.08;
+    overflow-wrap: break-word;
+  }
+  html[lang='ru'] .hero-title {
+    font-size: clamp(1.55rem, 6.7vw, 2.6rem);
+  }
+  @media (min-width: 640px) {
+    .hero-title { font-size: 3rem; }
+    html[lang='ru'] .hero-title { font-size: 2.7rem; }
+  }
+  @media (min-width: 1024px) {
+    .hero-title { font-size: clamp(2.6rem, 3.9vw, 3.6rem); }
+    html[lang='ru'] .hero-title { font-size: clamp(2.15rem, 3.3vw, 3.05rem); }
+  }
+
+  /* ---------- Neon va LED effektlari ---------- */
+  .neon-text {
+    color: var(--neon-ink);
+    text-shadow: var(--neon-glow);
+  }
+  html.js .hero-title .neon-text {
+    animation: flicker 2.2s linear 0.35s 1 both;
+  }
+
+  /* LED yugurma satr: matn nuqtali matritsa ko'rinishida */
+  .led-ticker {
+    @apply relative overflow-hidden border-y border-white/10 bg-brand-950;
+  }
+  .led-ticker.is-draggable {
+    cursor: grab;
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .led-ticker.is-draggable #ticker { will-change: transform; }
+  .led-ticker.is-dragging { cursor: grabbing; }
+  .led-ticker-glow {
+    filter: drop-shadow(0 0 5px rgba(180, 140, 255, 0.85));
+  }
+  .led-dots {
+    @apply font-display font-extrabold uppercase text-neon-200;
+    font-size: 1.5rem;
+    letter-spacing: 0.14em;
+    -webkit-mask-image: radial-gradient(circle, #000 0 1px, transparent 1.45px);
+    mask-image: radial-gradient(circle, #000 0 1px, transparent 1.45px);
+    -webkit-mask-size: 3px 3px;
+    mask-size: 3px 3px;
+  }
+  @media (min-width: 640px) {
+    .led-dots { font-size: 1.85rem; }
+  }
+
+  .bg-dots {
+    background-image: radial-gradient(rgb(var(--c-white) /0.09) 1px, transparent 1.4px);
+    background-size: 22px 22px;
+  }
+
+  /* ---------- Tugmalar ---------- */
+  .btn {
+    @apply relative inline-flex select-none items-center justify-center gap-2 rounded-full px-6 py-3.5 font-display text-sm font-bold;
+    letter-spacing: 0.01em;
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  }
+  .btn:hover { transform: translateY(-1px) scale(1.035); }
+  .btn:active { transform: scale(0.98); }
+  .btn svg { @apply h-4 w-4 shrink-0; transition: transform 0.3s ease; }
+  .btn:hover .btn-arrow { transform: translateX(4px); }
+
+  .btn-primary {
+    @apply bg-white text-brand-700;
+    box-shadow:
+      0 0 0 1px rgb(var(--c-white) /0.75),
+      0 0 22px rgba(180, 140, 255, 0.55),
+      0 14px 40px -14px rgba(154, 92, 255, 0.95);
+  }
+  .btn-primary:hover {
+    box-shadow:
+      0 0 0 1px rgb(var(--c-white)),
+      0 0 38px rgba(210, 184, 255, 0.95),
+      0 18px 50px -12px rgba(154, 92, 255, 1);
+  }
+
+  .btn-glass {
+    @apply border border-white/25 bg-white/[0.06] text-white backdrop-blur-md;
+    box-shadow: inset 0 1px 0 rgb(var(--c-white) /0.18);
+  }
+  .btn-glass:hover {
+    border-color: rgba(210, 184, 255, 0.9);
+    background-color: rgba(180, 140, 255, 0.14);
+    box-shadow:
+      inset 0 0 22px rgba(180, 140, 255, 0.35),
+      0 0 28px rgba(154, 92, 255, 0.45);
+  }
+
+  .btn-neon {
+    @apply text-white;
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(theme('colors.brand.800'), theme('colors.brand.800')) padding-box,
+      linear-gradient(120deg, #e4d4ff, #9a5cff 45%, #6d46bd) border-box;
+    box-shadow:
+      0 0 18px rgba(154, 92, 255, 0.45),
+      inset 0 0 14px rgba(180, 140, 255, 0.18);
+  }
+  .btn-neon:hover {
+    box-shadow:
+      0 0 30px rgba(180, 140, 255, 0.85),
+      inset 0 0 20px rgba(180, 140, 255, 0.35);
+  }
+
+  .btn-sm { @apply px-4 py-2.5 text-[0.8rem]; }
+
+  .btn-micro {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-1.5 font-display text-xs font-bold text-white;
+    transition: all 0.3s ease;
+  }
+  .btn-micro svg { @apply h-3.5 w-3.5; transition: transform 0.3s ease; }
+  .btn-micro:hover,
+  .svc-card:hover .btn-micro {
+    --c-white: 255 255 255; /* neon fon ustida matn har doim oq */
+    @apply border-neon-300 bg-neon-500 text-white;
+    box-shadow: 0 0 18px rgba(154, 92, 255, 0.7);
+  }
+  .btn-micro:hover svg,
+  .svc-card:hover .btn-micro svg { transform: translateX(3px); }
+
+  /* ---------- Shisha kartalar ---------- */
+  .glass {
+    @apply rounded-3xl border border-white/10 bg-white/[0.06];
+    box-shadow: inset 0 1px 0 rgb(var(--c-white) /0.12);
+  }
+
+  /* ---------- Header ---------- */
+  .site-header { transition: background-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease; }
+  .site-header.is-stuck,
+  .site-header.is-open {
+    background-color: rgb(var(--b-900) / 0.72);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    backdrop-filter: blur(18px) saturate(1.4);
+    box-shadow: 0 1px 0 rgb(var(--c-white) /0.1), 0 20px 40px -24px rgb(var(--shadow) /0.9);
+  }
+  .nav-link {
+    @apply relative rounded-full px-3 py-2 text-sm font-medium text-white/80 transition-colors xl:px-4;
+  }
+  .nav-link:hover,
+  .nav-link.is-current { @apply text-white; }
+  .nav-link::after {
+    content: '';
+    @apply absolute inset-x-3 -bottom-0.5 h-0.5 origin-left scale-x-0 rounded-full bg-neon-400 transition-transform duration-300 xl:inset-x-4;
+    box-shadow: 0 0 10px rgba(180, 140, 255, 0.9);
+  }
+  .nav-link:hover::after,
+  .nav-link.is-current::after { @apply scale-x-100; }
+
+  .lang-switch {
+    @apply inline-flex rounded-full border border-white/15 bg-white/[0.06] p-1;
+  }
+  .lang-switch button {
+    @apply rounded-full px-2.5 py-1 font-display text-xs font-bold text-white/70 transition;
+  }
+  .lang-switch button:hover { @apply text-white; }
+  .lang-switch button[aria-pressed='true'] {
+    @apply bg-white text-brand-700;
+    box-shadow: 0 0 14px rgba(180, 140, 255, 0.6);
+  }
+
+  /* ---------- Kunduzgi / tungi rejim tugmasi ---------- */
+  .theme-toggle {
+    @apply relative block h-8 w-[3.75rem] shrink-0 cursor-pointer overflow-hidden rounded-full border border-white/20;
+    background: linear-gradient(135deg, #160d3a, #35248a 60%, #5a3fc7);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.45), 0 0 14px rgba(154, 92, 255, 0.5);
+    transition: box-shadow 0.5s ease, border-color 0.5s ease, transform 0.3s ease;
+  }
+  .theme-toggle:hover { transform: scale(1.06); }
+  .theme-toggle:active { transform: scale(0.96); }
+  /* kunduzgi osmon — tungi osmon ustidan ochiladi */
+  .theme-toggle::before {
+    content: '';
+    @apply absolute inset-0 opacity-0;
+    background: linear-gradient(135deg, #3fa2f7, #8fd3ff 55%, #ffe7a8);
+    transition: opacity 0.6s ease;
+  }
+  /* oy; ::before qatlami — quyosh */
+  .tt-knob {
+    @apply absolute left-[3px] top-[3px] h-6 w-6 rounded-full;
+    background: radial-gradient(circle at 35% 30%, #fff, #dcd8f5 72%);
+    box-shadow: 0 0 10px rgba(228, 212, 255, 0.9), inset -3px -2px 0 rgba(120, 110, 170, 0.3);
+    transform: translateX(28px) rotate(0deg);
+    transition: transform 0.65s cubic-bezier(0.68, -0.45, 0.27, 1.45), box-shadow 0.6s ease;
+  }
+  .tt-knob::before {
+    content: '';
+    @apply absolute inset-0 rounded-full opacity-0;
+    background: radial-gradient(circle at 35% 30%, #fff9c4, #ffd23f 50%, #ff9f1c);
+    transition: opacity 0.5s ease;
+  }
+  .tt-knob i {
+    @apply absolute rounded-full;
+    background: rgba(120, 110, 170, 0.42);
+    transition: opacity 0.4s ease;
+  }
+  .tt-knob i:nth-child(1) { left: 5px; top: 6px; width: 6px; height: 6px; }
+  .tt-knob i:nth-child(2) { left: 13px; top: 12px; width: 5px; height: 5px; }
+  .tt-knob i:nth-child(3) { left: 7px; top: 15px; width: 3px; height: 3px; }
+  .tt-stars,
+  .tt-clouds {
+    @apply pointer-events-none absolute inset-0;
+    transition: opacity 0.5s ease, transform 0.65s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .tt-stars i {
+    @apply absolute rounded-full;
+    background: #fff;
+    box-shadow: 0 0 4px #fff;
+    animation: tt-twinkle 2.4s ease-in-out infinite;
+  }
+  .tt-stars i:nth-child(1) { left: 8px; top: 7px; width: 2px; height: 2px; }
+  .tt-stars i:nth-child(2) { left: 17px; top: 17px; width: 3px; height: 3px; animation-delay: 0.8s; }
+  .tt-stars i:nth-child(3) { left: 23px; top: 8px; width: 2px; height: 2px; animation-delay: 1.5s; }
+  @keyframes tt-twinkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.25; transform: scale(0.6); }
+  }
+  .tt-clouds {
+    opacity: 0;
+    transform: translateX(22px);
+  }
+  .tt-clouds i {
+    @apply absolute rounded-full;
+    background: #fff;
+  }
+  .tt-clouds i:nth-child(1) { right: 5px; top: 16px; width: 20px; height: 8px; box-shadow: -5px -4px 0 -1px #fff; }
+  .tt-clouds i:nth-child(2) { right: 16px; top: 7px; width: 11px; height: 5px; opacity: 0.8; }
+
+  html[data-theme='light'] .theme-toggle {
+    box-shadow: inset 0 2px 6px rgba(20, 70, 140, 0.3), 0 0 14px rgba(255, 190, 60, 0.55);
+  }
+  html[data-theme='light'] .theme-toggle::before { opacity: 1; }
+  html[data-theme='light'] .tt-knob {
+    transform: translateX(0) rotate(-180deg);
+    box-shadow: 0 0 0 3px rgba(255, 210, 63, 0.3), 0 0 16px rgba(255, 180, 40, 0.95);
+  }
+  html[data-theme='light'] .tt-knob::before { opacity: 1; }
+  html[data-theme='light'] .tt-knob i { opacity: 0; }
+  html[data-theme='light'] .tt-stars { opacity: 0; transform: translateY(10px); }
+  html[data-theme='light'] .tt-clouds { opacity: 1; transform: none; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    background:
+      radial-gradient(60rem 36rem at 88% -8%, rgba(154, 92, 255, 0.5), transparent 62%),
+      radial-gradient(44rem 30rem at -8% 30%, rgba(74, 46, 128, 0.95), transparent 65%),
+      linear-gradient(180deg, theme('colors.brand.800') 0%, theme('colors.brand.700') 55%, theme('colors.brand.800') 100%);
+  }
+  .hero-ambient img {
+    @apply absolute inset-0 h-full w-full scale-125 object-cover opacity-0;
+    filter: blur(70px) saturate(1.5);
+    transition: opacity 1.6s ease;
+  }
+  .hero-ambient img.is-active { opacity: 0.34; }
+
+  .screen {
+    @apply relative rounded-[1.75rem] p-2 sm:rounded-[2rem] sm:p-2.5;
+    background: linear-gradient(145deg, rgb(var(--c-white) /0.3), rgb(var(--c-white) /0.05) 45%, rgba(180, 140, 255, 0.28));
+    box-shadow:
+      0 0 0 1px rgb(var(--c-white) /0.12),
+      0 0 90px -12px rgba(154, 92, 255, 0.65),
+      0 50px 110px -40px rgb(var(--shadow) /0.95);
+  }
+  .screen-inner {
+    @apply relative overflow-hidden rounded-[1.3rem] bg-brand-950 sm:rounded-[1.45rem];
+    aspect-ratio: 4 / 3;
+  }
+  .screen-inner img {
+    @apply absolute inset-0 h-full w-full object-cover opacity-0;
+    transform: scale(1.07);
+    transition: opacity 1.1s ease, transform 9s ease-out;
+  }
+  /* slayd vaqtini ko'rsatuvchi neon chiziq (kengligi JS orqali boshqariladi) */
+  .screen-progress {
+    @apply absolute inset-x-0 bottom-0 z-10 h-1 bg-white/10;
+  }
+  .screen-progress span {
+    @apply block h-full w-full origin-left;
+    transform: scaleX(0);
+    background: linear-gradient(90deg, theme('colors.neon.600'), theme('colors.neon.400') 60%, #fff);
+    box-shadow:
+      0 0 6px rgb(var(--c-white) /0.9),
+      0 0 14px rgba(210, 184, 255, 0.95),
+      0 0 28px rgba(154, 92, 255, 0.9);
+  }
+  .screen-inner img.is-active {
+    opacity: 1;
+    transform: scale(1);
+  }
+  /* LED panel piksellari + pastki soya */
+  .screen-inner::after {
+    content: '';
+    @apply pointer-events-none absolute inset-0;
+    background:
+      linear-gradient(180deg, rgba(19, 9, 38, 0) 50%, rgba(19, 9, 38, 0.88) 100%),
+      radial-gradient(rgba(19, 9, 38, 0.28) 0.7px, transparent 1.1px) 0 0 / 4px 4px;
+  }
+  .screen-dot {
+    @apply h-1.5 w-1.5 rounded-full bg-white/35 transition-all duration-500;
+  }
+  .screen-dot.is-active {
+    @apply w-6 bg-white;
+    box-shadow: 0 0 10px rgba(210, 184, 255, 0.9);
+  }
+  .chip {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/20 bg-brand-950/55 px-3.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md;
+  }
+
+  /* Hero kirish animatsiyasi — JS ga bog'liq emas, sahifa ochilishi bilan ishlaydi */
+  [data-hero] {
+    animation: hero-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: var(--d, 0ms);
+  }
+  @keyframes hero-in {
+    from { opacity: 0; transform: translateY(22px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ---------- Scroll animatsiyalari (AOS uslubida) ---------- */
+  html.js [data-reveal] {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.75s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.75s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: var(--d, 0ms);
+  }
+  html.js [data-reveal='left'] { transform: translateX(-30px); }
+  html.js [data-reveal='right'] { transform: translateX(30px); }
+  html.js [data-reveal='zoom'] { transform: scale(0.94); }
+  html.js [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---------- Xizmat kartalari ---------- */
+  .svc-card {
+    @apply relative isolate flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.05] p-6 text-left;
+    box-shadow: inset 0 1px 0 rgb(var(--c-white) /0.1);
+    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.35s ease, box-shadow 0.35s ease, background-color 0.35s ease;
+  }
+  .svc-card::before {
+    content: '';
+    @apply absolute inset-0 -z-10 opacity-0;
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgba(180, 140, 255, 0.32), transparent 65%);
+    transition: opacity 0.35s ease;
+  }
+  .svc-card:hover,
+  .svc-card:focus-within {
+    transform: translateY(-6px) scale(1.02);
+    border-color: rgba(180, 140, 255, 0.75);
+    background-color: rgb(var(--c-white) /0.08);
+    box-shadow:
+      0 0 0 1px rgba(180, 140, 255, 0.35),
+      0 0 36px rgba(154, 92, 255, 0.4),
+      0 30px 60px -30px rgb(var(--shadow) /0.95);
+  }
+  .svc-card:hover::before,
+  .svc-card:focus-within::before { opacity: 1; }
+  .svc-icon {
+    @apply grid h-12 w-12 place-items-center rounded-2xl border border-white/15 bg-white/10 text-neon-300;
+    transition: all 0.35s ease;
+  }
+  .svc-icon svg { @apply h-6 w-6; }
+  .svc-card:hover .svc-icon,
+  .svc-card:focus-within .svc-icon {
+    --c-white: 255 255 255;
+    @apply border-neon-300 text-white;
+    background: linear-gradient(135deg, theme('colors.neon.400'), theme('colors.neon.600'));
+    box-shadow: 0 0 24px rgba(180, 140, 255, 0.85);
+    transform: scale(1.08) rotate(-4deg);
+  }
+  .svc-cta {
+    @apply relative flex flex-col justify-between gap-6 overflow-hidden rounded-3xl border border-neon-300/40 p-6 lg:col-span-2 lg:flex-row lg:items-center lg:p-8 xl:col-span-3;
+    background: linear-gradient(120deg, rgba(154, 92, 255, 0.4), rgba(74, 46, 128, 0.55));
+    box-shadow: inset 0 1px 0 rgb(var(--c-white) /0.16);
+  }
+  .svc-num {
+    @apply font-display text-xs font-bold tabular-nums text-white/30;
+    letter-spacing: 0.1em;
+  }
+
+  /* Umumiy ikonka uslubi */
+  .ico {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ico-fill { fill: currentColor; stroke: none; }
+
+  /* ---------- Portfolio ---------- */
+  .pf-filter {
+    @apply shrink-0 whitespace-nowrap rounded-full border border-white/15 bg-white/[0.05] px-4 py-2 font-display text-[0.8rem] font-bold text-white/75;
+    transition: all 0.3s ease;
+  }
+  .pf-filter:hover {
+    @apply border-neon-300/70 text-white;
+    box-shadow: inset 0 0 16px rgba(180, 140, 255, 0.25);
+  }
+  .pf-filter[aria-pressed='true'] {
+    @apply border-white bg-white text-brand-700;
+    box-shadow: 0 0 22px rgba(180, 140, 255, 0.65);
+  }
+  .pf-filter .pf-n { @apply ml-1.5 font-sans text-[0.7rem] font-semibold opacity-60; }
+
+  .pf-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 9.25rem;
+    grid-auto-flow: dense;
+    gap: 0.75rem;
+  }
+  @media (min-width: 640px) {
+    .pf-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 12rem; gap: 1rem; }
+  }
+  @media (min-width: 1024px) {
+    .pf-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 13.75rem; }
+  }
+  .pf-item {
+    @apply relative block overflow-hidden rounded-2xl border border-white/10 bg-brand-800 text-left sm:rounded-3xl;
+    cursor: zoom-in;
+    transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.35s ease, box-shadow 0.35s ease, opacity 0.4s ease;
+  }
+  .pf-item.is-tall { grid-row: span 2; }
+  .pf-item.is-wide { grid-column: span 2; }
+  .pf-item img {
+    @apply h-full w-full object-cover;
+    transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), filter 0.4s ease;
+  }
+  .pf-cap {
+    @apply absolute inset-0 flex flex-col justify-end p-3.5 sm:p-5;
+    background: linear-gradient(180deg, rgba(59, 34, 101, 0) 25%, rgba(43, 23, 77, 0.72) 62%, rgba(29, 15, 56, 0.97) 100%);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .pf-cap > * {
+    transform: translateY(12px);
+    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .pf-tag {
+    @apply mb-2 inline-flex w-fit items-center rounded-full border border-neon-300/50 bg-neon-500/25 px-2.5 py-0.5 font-display text-[0.65rem] font-bold uppercase text-neon-200;
+    letter-spacing: 0.08em;
+  }
+  .pf-title { @apply font-display text-sm font-bold leading-snug text-white sm:text-base; }
+  .pf-desc { @apply mt-1 hidden text-xs leading-snug text-brand-100/80 sm:block sm:text-[0.8rem]; }
+  .pf-item:hover,
+  .pf-item:focus-visible {
+    border-color: rgba(180, 140, 255, 0.8);
+    box-shadow:
+      0 0 0 1px rgba(180, 140, 255, 0.4),
+      0 0 40px rgba(154, 92, 255, 0.5),
+      0 30px 60px -30px rgb(var(--shadow) /1);
+    transform: translateY(-4px);
+    z-index: 2;
+  }
+  .pf-item:hover img,
+  .pf-item:focus-visible img { transform: scale(1.09); }
+  .pf-item:hover .pf-cap,
+  .pf-item:focus-visible .pf-cap { opacity: 1; }
+  .pf-item:hover .pf-cap > *,
+  .pf-item:focus-visible .pf-cap > * { transform: none; }
+  /* Sensorli ekranlarda hover yo'q — sarlavha doim ko'rinadi */
+  @media (hover: none) {
+    .pf-cap {
+      opacity: 1;
+      background: linear-gradient(180deg, rgba(29, 15, 56, 0) 45%, rgba(29, 15, 56, 0.9) 100%);
+    }
+    .pf-cap > * { transform: none; }
+    .pf-tag { display: none; }
+    .pf-desc { display: none; }
+  }
+  .pf-item.is-entering { animation: pf-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; animation-delay: var(--d, 0ms); }
+  @keyframes pf-in {
+    from { opacity: 0; transform: translateY(18px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ---------- Modal oynalar ---------- */
+  dialog.modal {
+    @apply m-auto w-[min(92vw,46rem)] overflow-hidden rounded-[1.75rem] border border-white/15 bg-brand-800 p-0 text-white;
+    max-height: min(88vh, 46rem);
+    box-shadow:
+      0 0 0 1px rgba(180, 140, 255, 0.25),
+      0 0 80px rgba(154, 92, 255, 0.35),
+      0 40px 100px -20px rgb(var(--shadow) /1);
+  }
+  dialog.modal[open] { display: flex; flex-direction: column; animation: modal-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  dialog::backdrop {
+    background: rgba(19, 9, 38, 0.78);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  @keyframes modal-in {
+    from { opacity: 0; transform: translateY(20px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+  dialog.lightbox {
+    @apply m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 text-white;
+  }
+  dialog.lightbox[open] { display: grid; place-items: center; animation: fade-in 0.3s ease; }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  .icon-btn {
+    @apply grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition;
+  }
+  .icon-btn:hover {
+    @apply border-neon-300 bg-neon-500/40;
+    box-shadow: 0 0 22px rgba(154, 92, 255, 0.7);
+  }
+  .icon-btn svg { @apply h-5 w-5; }
+
+  /* ---------- Forma ---------- */
+  .field {
+    @apply block w-full rounded-2xl border border-white/15 bg-white/[0.06] px-4 py-3.5 text-base text-white outline-none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+  }
+  .field::placeholder { color: rgb(var(--c-white) /0.38); }
+  .field:hover { border-color: rgb(var(--c-white) /0.3); }
+  .field:focus {
+    border-color: theme('colors.neon.300');
+    background-color: rgb(var(--c-white) /0.09);
+    box-shadow: 0 0 0 4px rgba(180, 140, 255, 0.2), 0 0 26px rgba(154, 92, 255, 0.35);
+    outline: none;
+  }
+  .field[aria-invalid='true'] {
+    border-color: #ff9db0;
+    box-shadow: 0 0 0 4px rgba(255, 120, 150, 0.16);
+  }
+  select.field {
+    appearance: none;
+    padding-right: 2.75rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23D2B8FF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.1rem;
+  }
+  select.field option { color: #1d0f38; background: #fff; }
+  select.field:invalid { color: rgb(var(--c-white) /0.45); }
+  .field-label { @apply mb-2 block font-display text-[0.8rem] font-bold text-white/90; }
+  .field-error { @apply mt-1.5 text-[0.8rem] text-[#ffb3c1]; }
+
+  /* ---------- Yugurma satrlar ---------- */
+  .marquee {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+  }
+  .marquee:hover .marquee-track { animation-play-state: paused; }
+  /* ---------- LED ekranlar: manzil tanlash ---------- */
+  .led-list {
+    @apply flex gap-2 overflow-x-auto pb-2 lg:grid lg:max-h-[35.5rem] lg:content-start lg:overflow-y-auto lg:overflow-x-hidden lg:pb-0 lg:pr-1.5;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(180, 140, 255, 0.5) transparent;
+  }
+  .led-item {
+    @apply flex w-60 shrink-0 items-start gap-3 rounded-2xl border border-white/10 bg-brand-950/35 p-3 text-left lg:w-full;
+    transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .led-item:hover { @apply border-neon-300/50 bg-white/[0.08]; }
+  .led-item[aria-pressed='true'] {
+    @apply border-neon-300 bg-neon-500/30;
+    box-shadow: 0 0 22px rgba(154, 92, 255, 0.45);
+  }
+  .led-num {
+    @apply grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/10 font-display text-xs font-bold text-neon-300;
+  }
+  .led-num svg { @apply h-4 w-4; }
+  .led-item[aria-pressed='true'] .led-num { @apply border-neon-300 bg-neon-400 text-brand-950; }
+
+  .client-group { @apply flex shrink-0; }
+  .client-card { @apply mx-2.5 w-32 shrink-0 sm:mx-3 sm:w-40; }
+  .client-logo {
+    @apply aspect-square overflow-hidden rounded-3xl border border-white/15 bg-white;
+    box-shadow: 0 14px 30px -18px rgba(10, 4, 28, 0.8);
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .client-logo img { @apply h-full w-full select-none object-cover; }
+  .client-card figcaption {
+    @apply mt-3 line-clamp-2 min-h-[2.5em] text-center font-display text-xs font-bold leading-tight text-white/85 sm:text-sm;
+    transition: color 0.3s ease;
+  }
+  .client-card:hover .client-logo {
+    @apply border-neon-300/70;
+    transform: translateY(-4px);
+    box-shadow: 0 0 0 1px rgba(180, 140, 255, 0.35), 0 0 26px rgba(154, 92, 255, 0.45);
+  }
+  .client-card:hover figcaption { @apply text-white; }
+
+  /* ---------- Aloqa kartalari ---------- */
+  .contact-row {
+    @apply flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.05] p-4;
+    transition: all 0.3s ease;
+  }
+  a.contact-row:hover {
+    @apply border-neon-300/70 bg-white/[0.09];
+    box-shadow: 0 0 26px rgba(154, 92, 255, 0.35);
+    transform: translateX(4px);
+  }
+  .contact-ico {
+    @apply grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/10 text-neon-300;
+  }
+  .contact-ico svg { @apply h-5 w-5; }
+  .social-btn {
+    @apply grid h-11 w-11 place-items-center rounded-full border border-white/15 bg-white/[0.06] text-white/85;
+    transition: all 0.3s ease;
+  }
+  .social-btn svg { @apply h-5 w-5; }
+  .social-btn:hover {
+    @apply border-neon-300 bg-neon-500/40 text-white;
+    box-shadow: 0 0 22px rgba(154, 92, 255, 0.7);
+    transform: translateY(-3px);
+  }
+}
+
+/* ============================================================
+   Mavzu ranglari: tungi (standart) va kunduzgi rejim
+   Qiymatlar "R G B" ko'rinishida — tailwind.config.js shu o'zgaruvchilardan foydalanadi.
+   ============================================================ */
+
+/* Tungi rejim. Ro'yxatdagi bloklar (rasm ustidagi yozuvlar, LED satr, footer va h.k.)
+   kunduzgi rejimda ham to'q ko'rinishda qoladi. */
+:root,
+.theme-dark,
+.chip,
+.pf-item,
+.screen,
+.led-ticker,
+.svc-cta,
+dialog.lightbox {
+  --b-50: 245 240 255;
+  --b-100: 233 223 251;
+  --b-200: 210 192 244;
+  --b-300: 179 154 230;
+  --b-400: 139 107 208;
+  --b-500: 74 46 128;
+  --b-600: 60 36 130;
+  --b-700: 59 34 101;
+  --b-800: 43 23 77;
+  --b-900: 29 15 56;
+  --b-950: 19 9 38;
+  --c-white: 255 255 255;
+  --n-200: 228 212 255;
+  --n-300: 210 184 255;
+  --n-400: 180 140 255;
+  --shadow: 10 4 24;
+  --star-ink: #ffd23f;
+  --neon-ink: #fff;
+  --neon-glow:
+    0 0 4px rgba(255, 255, 255, 0.85),
+    0 0 14px rgba(210, 184, 255, 0.9),
+    0 0 34px rgba(154, 92, 255, 0.85),
+    0 0 72px rgba(124, 58, 237, 0.7);
+}
+:root { color-scheme: dark; }
+:where(.theme-dark, .chip, .pf-item, .screen, .led-ticker, .svc-cta, dialog.lightbox) {
+  color: rgb(var(--c-white));
+}
+
+/* Kunduzgi rejim: fon ochiq, matn to'q binafsha */
+html[data-theme='light'] {
+  color-scheme: light;
+  --b-50: 29 15 56;
+  --b-100: 58 42 92;
+  --b-200: 74 46 128;
+  --b-300: 91 58 158;
+  --b-400: 139 107 208;
+  --b-500: 222 208 250;
+  --b-600: 230 219 252;
+  --b-700: 247 243 255;
+  --b-800: 240 232 255;
+  --b-900: 233 223 251;
+  --b-950: 226 213 248;
+  --c-white: 36 18 71;
+  --n-200: 91 33 182;
+  --n-300: 109 40 217;
+  --n-400: 124 58 237;
+  --shadow: 76 48 140;
+  --star-ink: #e58a00;
+  --neon-ink: #6d28d9;
+  --neon-glow:
+    0 0 16px rgba(154, 92, 255, 0.5),
+    0 0 40px rgba(154, 92, 255, 0.3);
+}
+html[data-theme='light'] .hero {
+  background:
+    radial-gradient(60rem 36rem at 88% -8%, rgba(154, 92, 255, 0.3), transparent 62%),
+    radial-gradient(44rem 30rem at -8% 30%, rgba(210, 184, 255, 0.55), transparent 65%),
+    linear-gradient(180deg, #f0e8ff 0%, #f7f3ff 55%, #f0e8ff 100%);
+}
+html[data-theme='light'] :is(.glass, .svc-card, .contact-row, .field) {
+  background-color: rgba(255, 255, 255, 0.72);
+}
+html[data-theme='light'] .glass {
+  box-shadow: inset 0 1px 0 #fff, 0 18px 40px -26px rgba(76, 48, 140, 0.5);
+}
+html[data-theme='light'] .svc-cta {
+  background: linear-gradient(120deg, #6d3fd0, #3b2265);
+}
+html[data-theme='light'] select.field {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236D28D9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+html[data-theme='light'] .field-error { color: #c81e4a; }
+html[data-theme='light'] .field[aria-invalid='true'] { border-color: #e0456b; }
+
+/* Rejim almashganda: tugmadan boshlab doira bo'lib ochiladi (View Transitions) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  animation: theme-reveal 0.75s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes theme-reveal {
+  from { clip-path: circle(0 at var(--vt-x, 100%) var(--vt-y, 0)); }
+  to { clip-path: circle(var(--vt-r, 150vmax) at var(--vt-x, 100%) var(--vt-y, 0)); }
+}
+/* View Transitions bo'lmagan brauzerlar uchun: ranglar silliq almashadi */
+html.theme-anim *,
+html.theme-anim *::before,
+html.theme-anim *::after {
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease !important;
+}
+
+/* ---------- Harakatni kamaytirish sozlamasi ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  html.js [data-reveal] { opacity: 1; transform: none; }
+  .marquee-track { animation: none !important; flex-wrap: wrap; width: auto; justify-content: center; row-gap: 0.75rem; }
+  .marquee { -webkit-mask-image: none; mask-image: none; }
+  .marquee-track > [aria-hidden='true'] { display: none; }
+  .client-group { flex-shrink: 1; flex-wrap: wrap; justify-content: center; row-gap: 1.25rem; }
+}
