@@ -9,15 +9,16 @@
   const CATS = window.STELLA_CATEGORIES || {};
   const WORKS = window.STELLA_PORTFOLIO || [];
   const CLIENTS = window.STELLA_CLIENTS || [];
-  const LED = window.STELLA_LED || [];
   const IMG = 'assets/img/portfolio/';
+  const LANGS = ['uz', 'ru', 'en'];
+  const MAP_LANG = { uz: 'uz_UZ', ru: 'ru_RU', en: 'en_US' };
 
   const root = document.documentElement;
   const $ = (sel, ctx) => (ctx || document).querySelector(sel);
   const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let lang = root.lang === 'ru' ? 'ru' : 'uz';
+  let lang = LANGS.includes(root.lang) ? root.lang : 'uz';
   let firstRender = true;
 
   /* ---------------- yordamchi funksiyalar ---------------- */
@@ -28,6 +29,8 @@
     if (vars && typeof s === 'string') s = s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : ''));
     return s;
   };
+  // ma'lumotdagi { uz, ru, en } qiymatidan joriy tildagisini olish (tarjima bo'lmasa — o'zbekchasi)
+  const tr = (o) => (o[lang] != null ? o[lang] : o.uz);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const icon = (id, cls) => `<svg class="${cls || 'ico'}" aria-hidden="true"><use href="#${id}"/></svg>`;
   const workByFile = (file) => WORKS.find((w) => w.file === file);
@@ -48,20 +51,21 @@
   }
 
   function setLang(next, persist) {
-    lang = next === 'ru' ? 'ru' : 'uz';
+    lang = LANGS.includes(next) ? next : 'uz';
     root.lang = lang;
     if (persist) {
       try { localStorage.setItem('stella-lang', lang); } catch (e) { /* xususiy rejim */ }
       try {
         const url = new URL(location.href);
-        if (lang === 'ru') url.searchParams.set('lang', 'ru'); else url.searchParams.delete('lang');
+        if (lang !== 'uz') url.searchParams.set('lang', lang); else url.searchParams.delete('lang');
         history.replaceState(null, '', url);
       } catch (e) { /* file:// */ }
     }
     $$('.lang-switch button').forEach((b) => b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === lang)));
     applyStaticText();
     renderTicker();
-    renderLed();
+    renderAdsTabs();
+    renderAds();
     renderServices();
     renderServiceOptions();
     renderFilters();
@@ -69,6 +73,43 @@
     updateHeroCaption();
     firstRender = false;
     root.classList.remove('i18n-pending');
+  }
+
+  // Til almashganda ekrandagi matnlar xiralashib yo'qoladi, yangi tilda esa pastdan suzib chiqadi.
+  // Web Animations API ishlatiladi — elementlarning o'z CSS animatsiyalariga (hero, reveal) tegmaydi.
+  const LANG_FX = '[data-i18n], [data-i18n-html], [data-i18n-fx]';
+  let langBusy = false;
+
+  function inView(el) {
+    const r = el.getBoundingClientRect();
+    return r.bottom > 0 && r.top < window.innerHeight && r.width > 0;
+  }
+
+  function switchLang(next) {
+    if (next === lang || langBusy) return;
+    const els = reduceMotion || !Element.prototype.animate ? [] : $$(LANG_FX).filter((el) => !el.parentElement.closest(LANG_FX) && inView(el));
+    if (!els.length) { setLang(next, true); return; }
+    langBusy = true;
+    const ease = 'cubic-bezier(.4,0,.2,1)';
+    const outs = els.map((el) => el.animate(
+      [{ opacity: 1, filter: 'blur(0)', translate: '0 0' }, { opacity: 0, filter: 'blur(6px)', translate: '0 -6px' }],
+      { duration: 170, easing: ease, fill: 'forwards' },
+    ));
+    Promise.all(outs.map((a) => a.finished)).catch(() => {}).then(() => {
+      setLang(next, true);
+      // qayta chizilgan bloklar ham animatsiyaga qo'shiladi
+      const fresh = $$(LANG_FX).filter((el) => !el.parentElement.closest(LANG_FX) && inView(el));
+      outs.forEach((a) => a.cancel());
+      const top = fresh.length ? Math.min(...fresh.map((el) => el.getBoundingClientRect().top)) : 0;
+      fresh.forEach((el) => {
+        const delay = Math.min(260, Math.max(0, el.getBoundingClientRect().top - top) * 0.35);
+        el.animate(
+          [{ opacity: 0, filter: 'blur(8px)', translate: '0 10px' }, { opacity: 1, filter: 'blur(0)', translate: '0 0' }],
+          { duration: 420, delay, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'backwards' },
+        );
+      });
+      langBusy = false;
+    });
   }
 
   /* ---------------- kunduzgi / tungi rejim ---------------- */
@@ -142,7 +183,7 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) { setMenu(false); menuBtn.focus(); } });
     window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => { if (e.matches) setMenu(false); });
 
-    $$('.lang-switch button').forEach((b) => b.addEventListener('click', () => setLang(b.getAttribute('data-lang'), true)));
+    $$('.lang-switch button').forEach((b) => b.addEventListener('click', () => switchLang(b.getAttribute('data-lang'))));
 
     // joriy bo'limni menyuda belgilash
     const links = $$('.nav-link');
@@ -224,13 +265,13 @@
   function updateHeroCaption() {
     hero.slides.forEach((img) => {
       const w = workByFile(img.getAttribute('data-file'));
-      if (w) img.alt = `${w[lang][0]} — ${w[lang][1]}`;
+      if (w) img.alt = `${tr(w)[0]} — ${tr(w)[1]}`;
     });
     const cur = hero.slides[hero.index];
     const w = cur && workByFile(cur.getAttribute('data-file'));
     if (!w) return;
-    $('#hero-cap-title').textContent = w[lang][0];
-    $('#hero-cap-desc').textContent = w[lang][1];
+    $('#hero-cap-title').textContent = tr(w)[0];
+    $('#hero-cap-desc').textContent = tr(w)[1];
   }
 
   function showSlide(n) {
@@ -339,57 +380,229 @@
     });
   }
 
-  /* ---------------- LED ekranlar: manzil → Yandex xarita ---------------- */
-  const led = { index: -1 };
-  const ledPoint = (p) => `${p.ll[1]},${p.ll[0]}`;
-  // bir nuqtada bir nechta ekran bo'lishi mumkin — umumiy ko'rinishda takrorlanmaydi
-  const ledAllPoints = () => Array.from(new Set(LED.map(ledPoint)));
+  /* ---------------- reklama joylari: tur → manzil → Yandex xarita ---------------- */
+  // service — "Reklama berish" tugmasi bosilganda formada tanlanadigan xizmat
+  const NETS = [
+    { id: 'led', icon: 's-led', service: 'led', items: window.STELLA_LED || [] },
+    { id: 'billboard', icon: 's-billboard', service: 'billboard', items: window.STELLA_BILLBOARDS || [] },
+    { id: 'bus', icon: 's-bus', service: 'transport', items: window.STELLA_BUS || [] },
+    { id: 'stop', icon: 's-stop', service: 'other', items: window.STELLA_STOPS || [] },
+  ];
+  const ads = { net: NETS[0], index: -1 };
+  const adPoint = (p) => `${p.ll[1]},${p.ll[0]}`;
+  const adKey = (k) => t(`ads.${ads.net.id}.${k}`);
 
-  function ledMapUrl(p, embed) {
+  function adsMapUrl(p, embed) {
     const base = embed ? 'https://yandex.uz/map-widget/v1/' : 'https://yandex.uz/maps/';
-    const q = p
-      ? `ll=${ledPoint(p)}&z=17&pt=${ledPoint(p)},pm2vvl`
-      : `ll=64.5500,39.9300&z=10&pt=${ledAllPoints().map((pt) => `${pt},pm2vvm`).join('~')}`;
-    return `${base}?${q}&lang=${lang === 'ru' ? 'ru_RU' : 'uz_UZ'}`;
+    const items = ads.net.items;
+    // bir nuqtada bir nechta joy bo'lishi mumkin — umumiy ko'rinishda takrorlanmaydi
+    const pts = Array.from(new Set(items.map(adPoint)));
+    let q;
+    if (p) q = `ll=${adPoint(p)}&z=17&pt=${adPoint(p)},pm2vvl`;
+    else if (!pts.length) q = 'll=64.4286,39.7747&z=12';
+    else {
+      const lat = items.map((x) => x.ll[0]);
+      const lon = items.map((x) => x.ll[1]);
+      const far = Math.max(...lat) - Math.min(...lat) > 1 || Math.max(...lon) - Math.min(...lon) > 1;
+      // G'ijduvondagi joylar ham bo'lsa, xarita kengroq ko'rinishda ochiladi;
+      // boshqa shahardagi joy bo'lsa (masalan, Toshkent) — barcha nuqtalar sig'adigan oyna (bbox)
+      const wide = items.some((x) => x.city !== 'bx');
+      const view = far
+        ? `bbox=${Math.min(...lon) - 0.3},${Math.min(...lat) - 0.3}~${Math.max(...lon) + 0.3},${Math.max(...lat) + 0.3}`
+        : wide ? 'll=64.5500,39.9300&z=10' : 'll=64.4286,39.7747&z=12';
+      q = `${view}&pt=${pts.map((pt) => `${pt},pm2vvm`).join('~')}`;
+    }
+    return `${base}?${q}&lang=${MAP_LANG[lang]}`;
   }
 
-  function showLed(i) {
-    led.index = i;
-    const p = LED[i];
-    $$('#led-list .led-item').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.getAttribute('data-led')) === i)));
-    const map = $('#led-map');
-    const src = ledMapUrl(p, true);
-    if (map && map.getAttribute('src') !== src) map.setAttribute('src', src);
-    $('#led-cur-title').textContent = p ? p[lang][0] : t('led.all');
-    $('#led-cur-desc').textContent = p
-      ? `${p[lang][1]} · ${t('led.city.' + p.city)} · ${t('led.size', { w: p.size[0], h: p.size[1] })}`
-      : t('led.pick');
-    $('#led-open').setAttribute('href', ledMapUrl(p, false));
+  /* Yandex Maps JS API: tanlangan LED ekran yoki bekat nuqtasida uning rasmi chiqadi
+     va xarita bilan birga suriladi. API yuklanmasa, oddiy Yandex vidjeti (iframe) ishlashda davom etadi. */
+  const BUKHARA = [39.7747, 64.4286];
+  // rasm pastki o'rtasi aynan nuqtaga tushadi (ustun / bekat poli)
+  const PINS = {
+    led: { href: 'assets/img/led-pin.png', w: 96, h: 108 },
+    stop: { href: 'assets/img/stop-pin.png', w: 220, h: 94 },
+  };
+  const ymap = { state: 'idle', map: null };
+
+  function loadYmaps() {
+    if (ymap.state !== 'idle') return;
+    ymap.state = 'loading';
+    const key = (window.STELLA_CONFIG || {}).ymapsKey;
+    const s = document.createElement('script');
+    s.src = `https://api-maps.yandex.ru/2.1/?lang=${MAP_LANG[lang]}${key ? `&apikey=${encodeURIComponent(key)}` : ''}`;
+    s.async = true;
+    s.onerror = () => { ymap.state = 'failed'; };
+    s.onload = () => {
+      if (!window.ymaps) { ymap.state = 'failed'; return; }
+      window.ymaps.ready(() => {
+        const el = $('#ads-ymap');
+        try {
+          ymap.map = new window.ymaps.Map(el, { center: BUKHARA, zoom: 12, controls: ['zoomControl', 'fullscreenControl'] }, { suppressMapOpenBlock: true });
+        } catch (err) { ymap.state = 'failed'; return; }
+        // sahifani aylantirganda xarita kattalashib ketmasin
+        ymap.map.behaviors.disable('scrollZoom');
+        ymap.state = 'ready';
+        el.hidden = false;
+        const frame = $('#ads-map');
+        frame.hidden = true;
+        frame.removeAttribute('src');
+        drawYmap();
+      });
+    };
+    document.head.appendChild(s);
   }
 
-  function renderLed() {
-    const list = $('#led-list');
-    if (!list) return;
-    const item = (i, badge, title, desc) => `
-      <button type="button" class="led-item" data-led="${i}" aria-pressed="false">
-        <span class="led-num">${badge}</span>
-        <span class="min-w-0">
-          <span class="block font-display text-sm font-bold">${esc(title)}</span>
-          <span class="mt-0.5 block text-xs leading-snug text-brand-100/75">${esc(desc)}</span>
-        </span>
+  function drawYmap() {
+    if (ymap.state !== 'ready') return;
+    const Y = window.ymaps;
+    const map = ymap.map;
+    const items = ads.net.items;
+    const sel = items[ads.index];
+    map.geoObjects.removeAll();
+    // bir nuqtada bir nechta joy bo'lishi mumkin — har nuqtaga bitta belgi
+    const seen = new Set(sel ? [adPoint(sel)] : []);
+    items.forEach((p, i) => {
+      if (seen.has(adPoint(p))) return;
+      seen.add(adPoint(p));
+      const mark = new Y.Placemark(p.ll, { hintContent: tr(p)[0] }, { preset: 'islands#violetCircleDotIcon' });
+      mark.events.add('click', () => showAd(i));
+      map.geoObjects.add(mark);
+    });
+    if (sel) {
+      const pin = PINS[ads.net.id];
+      const opts = pin
+        ? { iconLayout: 'default#image', iconImageHref: pin.href, iconImageSize: [pin.w, pin.h], iconImageOffset: [-pin.w / 2, -pin.h], zIndex: 1000 }
+        : { preset: 'islands#violetDotIcon', zIndex: 1000 };
+      map.geoObjects.add(new Y.Placemark(sel.ll, { hintContent: tr(sel)[0] }, opts));
+      map.setCenter(sel.ll, 16, { duration: 300 });
+    } else if (items.length > 1) {
+      map.setBounds(map.geoObjects.getBounds(), { checkZoomRange: true, zoomMargin: 40, duration: 300 });
+    } else {
+      map.setCenter(items.length ? items[0].ll : BUKHARA, items.length ? 15 : 12, { duration: 300 });
+    }
+  }
+
+  function showAd(i) {
+    ads.index = i;
+    const p = ads.net.items[i];
+    $$('#ads-list .led-item').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.getAttribute('data-ad')) === i)));
+    const map = $('#ads-map');
+    const src = adsMapUrl(p, true);
+    if (ymap.state === 'ready') drawYmap();
+    else if (map && map.getAttribute('src') !== src) map.setAttribute('src', src);
+    let title = adKey('all');
+    let desc = adKey('pick');
+    if (p) {
+      title = tr(p)[0];
+      desc = [tr(p)[1], t('ads.city.' + p.city), p.size ? t('ads.size', { w: p.size[0], h: p.size[1] }) : ''].filter(Boolean).join(' · ');
+    } else if (!ads.net.items.length) {
+      title = t('ads.tab.' + ads.net.id);
+      desc = t('ads.empty.title');
+    }
+    $('#ads-cur-title').textContent = title;
+    $('#ads-cur-desc').textContent = desc;
+    $('#ads-open').setAttribute('href', adsMapUrl(p, false));
+  }
+
+  function renderAdsTabs() {
+    const el = $('#ads-tabs');
+    if (!el) return;
+    el.innerHTML = NETS.map((n) => {
+      const on = n === ads.net;
+      return `
+      <button type="button" role="tab" class="ads-tab" id="ads-tab-${n.id}" data-net="${n.id}" aria-selected="${on}" aria-controls="ads-list" tabindex="${on ? 0 : -1}">
+        <span class="ads-tab-ico">${icon(n.icon)}</span>
+        <span class="min-w-0 flex-1">${esc(t('ads.tab.' + n.id))}</span>
+        ${n.items.length ? `<span class="ads-tab-n">${n.items.length}</span>` : ''}
       </button>`;
-    list.innerHTML = item(-1, icon('i-pin'), t('led.all'), t('led.count', { n: LED.length }))
-      + LED.map((p, i) => item(i, i + 1, p[lang][0], p[lang][1])).join('');
-    showLed(led.index);
+    }).join('');
   }
 
-  function initLed() {
-    const list = $('#led-list');
+  function renderAds(animate) {
+    const list = $('#ads-list');
     if (!list) return;
+    const n = ads.net;
+    $('#ads-title').innerHTML = adKey('title');
+    $('#ads-sub').textContent = adKey('sub');
+    $('#ads-cta-text').textContent = adKey('cta');
+    $('#ads-cta').setAttribute('data-service', n.service);
+    $('#ads-map').setAttribute('title', adKey('map'));
+    list.setAttribute('aria-labelledby', 'ads-tab-' + n.id);
+
+    const fx = (k) => (animate ? ` is-entering" style="--d:${Math.min(k, 8) * 40}ms` : '');
+    if (!n.items.length) {
+      list.innerHTML = `
+        <div class="ads-empty${fx(0)}">
+          <span class="ads-tab-ico !h-11 !w-11">${icon(n.icon)}</span>
+          <p class="mt-4 font-display text-base font-bold">${esc(t('ads.empty.title'))}</p>
+          <p class="mt-1.5 text-sm leading-relaxed text-brand-100/75">${esc(t('ads.empty.text'))}</p>
+          <a href="tel:${esc(CFG.phone || '')}" class="btn btn-glass btn-sm mt-5">${icon('i-phone')}<span>${esc(CFG.phoneDisplay || '')}</span></a>
+        </div>`;
+    } else {
+      const item = (i, badge, title, desc, k) => `
+        <button type="button" class="led-item${fx(k)}" data-ad="${i}" aria-pressed="false">
+          <span class="led-num">${badge}</span>
+          <span class="min-w-0">
+            <span class="block font-display text-sm font-bold">${esc(title)}</span>
+            <span class="mt-0.5 block text-xs leading-snug text-brand-100/75">${esc(desc)}</span>
+          </span>
+        </button>`;
+      list.innerHTML = item(-1, icon('i-pin'), adKey('all'), t('ads.count', { n: n.items.length }), 0)
+        + n.items.map((p, i) => item(i, i + 1, tr(p)[0], tr(p)[1], i + 1)).join('');
+    }
+    list.scrollTop = 0;
+    list.scrollLeft = 0;
+    showAd(ads.index);
+  }
+
+  function setNet(id, focus) {
+    const n = NETS.find((x) => x.id === id);
+    if (!n || n === ads.net) return;
+    ads.net = n;
+    ads.index = -1;
+    $$('#ads-tabs .ads-tab').forEach((b) => {
+      const on = b.getAttribute('data-net') === id;
+      b.setAttribute('aria-selected', String(on));
+      b.tabIndex = on ? 0 : -1;
+      if (on && focus) b.focus();
+    });
+    const head = $('#ads-head');
+    if (head && !reduceMotion && head.animate) {
+      head.animate([{ opacity: 0, translate: '0 10px' }, { opacity: 1, translate: '0 0' }], { duration: 380, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    }
+    renderAds(!reduceMotion);
+  }
+
+  function initAds() {
+    // xarita API'si bo'lim ko'rinishiga yaqinlashganda yuklanadi
+    const sec = $('#led');
+    if (sec && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((en) => {
+        if (en.some((x) => x.isIntersecting)) { io.disconnect(); loadYmaps(); }
+      }, { rootMargin: '600px 0px' });
+      io.observe(sec);
+    } else loadYmaps();
+    const tabs = $('#ads-tabs');
+    const list = $('#ads-list');
+    if (!tabs || !list) return;
+    tabs.addEventListener('click', (e) => {
+      const b = e.target.closest('.ads-tab');
+      if (b) setNet(b.getAttribute('data-net'));
+    });
+    // klaviatura: chap/o'ng/yuqori/past strelkalar bilan turlar orasida yurish
+    tabs.addEventListener('keydown', (e) => {
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (!step) return;
+      e.preventDefault();
+      const i = NETS.indexOf(ads.net);
+      setNet(NETS[(i + step + NETS.length) % NETS.length].id, true);
+    });
     list.addEventListener('click', (e) => {
       const btn = e.target.closest('.led-item');
-      if (btn) showLed(Number(btn.getAttribute('data-led')));
+      if (btn) showAd(Number(btn.getAttribute('data-ad')));
     });
+    list.addEventListener('animationend', (e) => { if (e.target.classList) e.target.classList.remove('is-entering'); });
   }
 
   /* ---------------- xizmatlar ---------------- */
@@ -398,7 +611,7 @@
     if (!grid) return;
     const reveal = (i) => (firstRender ? ` data-reveal style="--d:${(i % 4) * 70}ms"` : '');
     const cards = SERVICES.map((s, i) => {
-      const L = s[lang];
+      const L = tr(s);
       return `
       <article class="svc-card" data-glow${reveal(i)}>
         <span class="svc-num absolute right-6 top-6">${String(i + 1).padStart(2, '0')}</span>
@@ -431,6 +644,7 @@
   let currentService = null;
 
   function serviceSamples(s) {
+    if (s.gallery) return s.gallery;
     if (s.samples) return s.samples.map(workByFile).filter(Boolean);
     return s.cat ? WORKS.filter((w) => w.cat === s.cat).slice(0, 3) : [];
   }
@@ -439,7 +653,7 @@
     const s = SERVICES.find((x) => x.id === id);
     if (!s || !svcModal) return;
     currentService = s;
-    const L = s[lang];
+    const L = tr(s);
     $('#svc-modal-icon').innerHTML = icon(s.icon);
     $('#svc-modal-title').textContent = L.title;
     $('#svc-modal-text').textContent = L.text;
@@ -451,9 +665,10 @@
 
     const samples = serviceSamples(s);
     $('#svc-modal-samples-wrap').hidden = samples.length === 0;
-    $('#svc-modal-samples').innerHTML = samples.map((w) => `
-      <button type="button" class="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 transition hover:border-neon-300" data-sample="${esc(w.file)}" title="${esc(w[lang][0])}">
-        <img src="${IMG}${esc(w.file)}" alt="${esc(w[lang][0] + ' — ' + w[lang][1])}" loading="lazy" class="h-full w-full object-cover transition duration-500 group-hover:scale-110">
+    // oynada ko'pi bilan 6 ta rasm; to'liq ro'yxat rasm ko'rish oynasida varaqlanadi
+    $('#svc-modal-samples').innerHTML = samples.slice(0, 6).map((w) => `
+      <button type="button" class="group relative aspect-[4/3] overflow-hidden rounded-xl border border-white/10 transition hover:border-neon-300" data-sample="${esc(w.file)}" title="${esc(tr(w)[0])}">
+        <img src="${IMG}${esc(w.file)}" alt="${esc(tr(w)[0] + ' — ' + tr(w)[1])}" loading="lazy" class="h-full w-full object-cover transition duration-500 group-hover:scale-110">
       </button>`).join('');
 
     if (!svcModal.open) svcModal.showModal();
@@ -503,12 +718,12 @@
 
   function tile(w, i, entering, order) {
     const shape = w.shape === 'tall' ? ' is-tall' : w.shape === 'wide' ? ' is-wide' : '';
-    const [title, desc] = w[lang];
+    const [title, desc] = tr(w);
     return `
       <button type="button" class="pf-item${shape}${entering ? ' is-entering' : ''}" data-index="${i}"${entering ? ` style="--d:${order * 45}ms"` : ''}>
         <img src="${IMG}${esc(w.file)}" alt="${esc(title + ' — ' + desc)}" width="${w.w}" height="${w.h}" loading="lazy" decoding="async">
         <span class="pf-cap">
-          <span class="pf-tag">${esc(CATS[w.cat] ? CATS[w.cat][lang] : '')}</span>
+          <span class="pf-tag">${esc(CATS[w.cat] ? tr(CATS[w.cat]) : '')}</span>
           <span class="pf-title">${esc(title)}</span>
           <span class="pf-desc">${esc(desc)}</span>
         </span>
@@ -520,7 +735,7 @@
     if (!el) return;
     el.innerHTML = Object.keys(CATS).map((k) => {
       const n = k === 'all' ? WORKS.length : WORKS.filter((w) => w.cat === k).length;
-      return `<button type="button" class="pf-filter" data-filter="${k}" aria-pressed="${k === pf.filter}">${esc(CATS[k][lang])}<span class="pf-n">${n}</span></button>`;
+      return `<button type="button" class="pf-filter" data-filter="${k}" aria-pressed="${k === pf.filter}">${esc(tr(CATS[k]))}<span class="pf-n">${n}</span></button>`;
     }).join('');
   }
 
@@ -584,12 +799,12 @@
     if (!w) return;
     const img = $('#lb-img');
     img.src = IMG + w.file;
-    img.alt = `${w[lang][0]} — ${w[lang][1]}`;
+    img.alt = `${tr(w)[0]} — ${tr(w)[1]}`;
     img.width = w.w;
     img.height = w.h;
-    $('#lb-tag').textContent = CATS[w.cat] ? CATS[w.cat][lang] : '';
-    $('#lb-title').textContent = w[lang][0];
-    $('#lb-desc').textContent = w[lang][1];
+    $('#lb-tag').textContent = CATS[w.cat] ? tr(CATS[w.cat]) : '';
+    $('#lb-title').textContent = tr(w)[0];
+    $('#lb-desc').textContent = tr(w)[1];
     $('#lb-count').textContent = `${lbState.index + 1} / ${lbState.list.length}`;
     const single = lbState.list.length < 2;
     $('#lb-prev').hidden = single;
@@ -644,7 +859,7 @@
     if (!sel) return;
     const current = sel.value;
     sel.innerHTML = `<option value="">${esc(t('form.service.ph'))}</option>` +
-      SERVICES.map((s) => `<option value="${s.id}">${esc(s[lang].title)}</option>`).join('') +
+      SERVICES.map((s) => `<option value="${s.id}">${esc(tr(s).title)}</option>`).join('') +
       `<option value="other">${esc(t('form.service.other'))}</option>`;
     sel.value = current;
   }
@@ -725,7 +940,7 @@
       const lead = {
         name: cleanName,
         phone: formatPhone(digits),
-        service: svc ? svc[lang].title : t('form.service.other'),
+        service: svc ? tr(svc).title : t('form.service.other'),
         serviceId: service.value,
         lang,
       };
@@ -757,13 +972,33 @@
     });
   }
 
+  /* ---------------- kirish animatsiyasi ---------------- */
+  function initIntro() {
+    const el = $('#intro');
+    if (!el) return;
+    if (root.classList.contains('no-intro')) { el.remove(); return; }
+    const done = () => {
+      root.classList.remove('intro-on');
+      document.removeEventListener('keydown', skip);
+      el.remove();
+    };
+    function skip() {
+      root.classList.add('intro-skip');
+      setTimeout(done, 450);
+    }
+    el.addEventListener('click', skip);
+    document.addEventListener('keydown', skip);
+    el.addEventListener('animationend', (e) => { if (e.target === el) done(); });
+  }
+
   /* ---------------- ishga tushirish ---------------- */
   function init() {
+    initIntro();
     initHero();
     renderClients();
     setLang(lang, false);
     initTicker();
-    initLed();
+    initAds();
     initTheme();
     initHeader();
     initServices();

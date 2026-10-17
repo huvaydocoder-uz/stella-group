@@ -15,6 +15,7 @@
   <meta property="og:image" content="assets/img/og-image.jpg">
   <meta property="og:locale" content="uz_UZ">
   <meta property="og:locale:alternate" content="ru_RU">
+  <meta property="og:locale:alternate" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
 
   <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
@@ -38,9 +39,18 @@
       try {
         var q = new URLSearchParams(location.search).get('lang');
         var s = localStorage.getItem('stella-lang');
-        if (q === 'ru' || q === 'uz') lang = q;
-        else if (s === 'ru' || s === 'uz') lang = s;
+        var ok = function (v) { return v === 'uz' || v === 'ru' || v === 'en'; };
+        if (ok(q)) lang = q;
+        else if (ok(s)) lang = s;
       } catch (e) {}
+      // kirish animatsiyasi: har safar sahifa ochilganda (yangilanganda ham);
+      // "harakatni kamaytirish" yoqilgan bo'lsa ko'rsatilmaydi
+      var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (calm) d.classList.add('no-intro');
+      else {
+        d.classList.add('intro-on');
+        setTimeout(function () { d.classList.remove('intro-on'); }, 4200);
+      }
       if (lang !== 'uz') {
         d.lang = lang;
         d.classList.add('i18n-pending');
@@ -73,6 +83,19 @@
 </head>
 
 <body class="overflow-x-hidden">
+
+<!-- ===================== 0. KIRISH ANIMATSIYASI (har safar sahifa ochilganda; bosilsa o'tkazib yuboriladi) ===================== -->
+<div id="intro" class="intro" aria-hidden="true">
+  <div class="intro-logo">
+    <img class="intro-word" src="assets/img/logo-white.png" alt="" width="872" height="440">
+    <img class="intro-star" src="assets/img/logo-white.png" alt="" width="872" height="440">
+    <img class="intro-group" src="assets/img/logo-white.png" alt="" width="872" height="440">
+  </div>
+  <p class="intro-slogan">
+    <span class="intro-line"><span data-i18n="intro.l1">G‘oya desa — qop-qop</span></span>
+    <span class="intro-line"><span data-i18n-html="intro.l2">Kreativlikni <span class="intro-hl">Stelladan</span> top!</span></span>
+  </p>
+</div>
 
 <!-- ===================== SVG ikonkalar ===================== -->
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" class="absolute" aria-hidden="true" focusable="false">
@@ -111,6 +134,12 @@
   <symbol id="s-led" viewBox="0 0 24 24"><rect x="2.500" y="4" width="19" height="12" rx="2"/><path d="M12 16v4M8 20h8M7 8h.01M10.300 8h.01M13.700 8h.01M17 8h.01M7 12h.01M10.300 12h.01M13.700 12h.01M17 12h.01"/></symbol>
   <symbol id="s-billboard" viewBox="0 0 24 24"><rect x="2.500" y="5" width="19" height="10" rx="1.500"/><path d="M12 15v6.500M8.500 21.500h7M7 5V3M12 5V3M17 5V3"/></symbol>
   <symbol id="s-bus" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 18v2.500M16 18v2.500M8 14.500h.01M16 14.500h.01M9 6.500h6"/></symbol>
+  <symbol id="s-stop" viewBox="0 0 24 24"><path d="M2.500 5.500 12 3l9.500 2.500M4.500 5v16M19.500 5v16M3 21h18"/><rect x="7" y="8" width="7.500" height="9" rx="1"/><path d="M17 8.500v3.500M17 14.500h.01"/></symbol>
+
+  <!-- til bayroqchalari (aylana shaklida kesiladi) -->
+  <symbol id="f-uz" viewBox="0 0 24 24"><path fill="#0099B5" d="M0 0h24v8H0z"/><path fill="#fff" d="M0 8.800h24v6.400H0z"/><path fill="#CE1126" d="M0 8h24v.8H0zM0 15.200h24v.8H0z"/><path fill="#1EB53A" d="M0 16h24v8H0z"/><circle cx="7.600" cy="4.400" r="2.600" fill="#fff"/><circle cx="8.600" cy="4.400" r="2.200" fill="#0099B5"/><circle cx="12" cy="3.200" r=".55" fill="#fff"/><circle cx="14" cy="3.200" r=".55" fill="#fff"/><circle cx="12" cy="5.400" r=".55" fill="#fff"/><circle cx="14" cy="5.400" r=".55" fill="#fff"/><circle cx="16" cy="4.300" r=".55" fill="#fff"/></symbol>
+  <symbol id="f-ru" viewBox="0 0 24 24"><path fill="#fff" d="M0 0h24v8H0z"/><path fill="#0039A6" d="M0 8h24v8H0z"/><path fill="#D52B1E" d="M0 16h24v8H0z"/></symbol>
+  <symbol id="f-en" viewBox="0 0 24 24"><path fill="#fff" d="M0 0h24v24H0z"/><path fill="#B22234" d="M0 0h24v1.850H0zM0 3.690h24v1.850H0zM0 7.380h24v1.850H0zM0 11.080h24v1.850H0zM0 14.770h24v1.850H0zM0 18.460h24v1.850H0zM0 22.150h24v1.850H0z"/><path fill="#3C3B6E" d="M0 0h11v12.920H0z"/><g fill="#fff"><circle cx="2.600" cy="3.200" r=".6"/><circle cx="5.500" cy="3.200" r=".6"/><circle cx="8.400" cy="3.200" r=".6"/><circle cx="4" cy="5.700" r=".6"/><circle cx="7" cy="5.700" r=".6"/><circle cx="2.600" cy="8.200" r=".6"/><circle cx="5.500" cy="8.200" r=".6"/><circle cx="8.400" cy="8.200" r=".6"/><circle cx="4" cy="10.600" r=".6"/><circle cx="7" cy="10.600" r=".6"/></g></symbol>
 </svg>
 
 <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-white focus:px-5 focus:py-3 focus:font-display focus:text-sm focus:font-bold focus:text-brand-700" data-i18n="a11y.skip">Asosiy kontentga o‘tish</a>
@@ -131,9 +160,18 @@
     </nav>
 
     <div class="flex items-center gap-2 sm:gap-3">
-      <div class="lang-switch" role="group" aria-label="Til / Язык">
-        <button type="button" data-lang="uz" aria-pressed="true" lang="uz" title="O‘zbekcha">UZ</button>
-        <button type="button" data-lang="ru" aria-pressed="false" lang="ru" title="Русский">RU</button>
+      <!-- til tanlash: oq "pill" tanlangan til ostiga sirpanib o'tadi -->
+      <div class="lang-switch" role="group" aria-label="Til / Язык / Language">
+        <span class="lang-pill" aria-hidden="true"></span>
+        <button type="button" data-lang="uz" aria-pressed="true" lang="uz" title="O‘zbekcha" aria-label="O‘zbekcha">
+          <svg class="flag" aria-hidden="true"><use href="#f-uz"/></svg><span class="lang-code">UZ</span>
+        </button>
+        <button type="button" data-lang="ru" aria-pressed="false" lang="ru" title="Русский" aria-label="Русский">
+          <svg class="flag" aria-hidden="true"><use href="#f-ru"/></svg><span class="lang-code">RU</span>
+        </button>
+        <button type="button" data-lang="en" aria-pressed="false" lang="en" title="English" aria-label="English">
+          <svg class="flag" aria-hidden="true"><use href="#f-en"/></svg><span class="lang-code">EN</span>
+        </button>
       </div>
       <!-- kunduzgi / tungi rejim: oy ↔ quyosh -->
       <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="true" aria-label="Tungi rejim" data-i18n-attr="aria-label:a11y.theme;title:a11y.theme.hint" title="Kunduzgi / tungi rejim">
@@ -171,6 +209,16 @@
 <main id="main">
 
 <!-- ===================== 2. HERO ===================== -->
+<!-- ===================== 1. SAHNA: chorraha o'rtasidagi LED ekran (assets/js/scene.js — canvas animatsiya) ===================== -->
+<section id="scene" class="scene relative isolate h-[100svh] min-h-[32rem] overflow-hidden bg-brand-950">
+  <canvas id="scene-canvas" class="absolute inset-0 block h-full w-full" role="img" aria-label="Kechki gavjum chorraha: yo‘l o‘rtasida Stella LED ekrani — «Bu yerda reklamangizni joylashtirmang»" data-i18n-attr="aria-label:scene.alt"></canvas>
+  <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-brand-800" aria-hidden="true"></div>
+  <a href="#top" class="scene-cue">
+    <span class="scene-cue-label" data-i18n="scene.more">Batafsil</span>
+    <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg>
+  </a>
+</section>
+
 <section id="top" class="hero relative isolate overflow-hidden pb-16 pt-28 sm:pt-36 lg:pb-24 lg:pt-40">
   <!-- fon: joriy slaydning xira aksi -->
   <div class="hero-ambient pointer-events-none absolute inset-0 -z-20 hidden overflow-hidden lg:block" aria-hidden="true">
@@ -211,7 +259,7 @@
           <dt class="mt-1 text-xs leading-snug text-brand-100/75 sm:text-sm" data-i18n="hero.t2">muvaffaqiyatli loyiha</dt>
         </div>
         <div class="pl-3 sm:pl-5">
-          <dd class="font-display text-2xl font-extrabold sm:text-3xl">18</dd>
+          <dd class="font-display text-2xl font-extrabold sm:text-3xl">21</dd>
           <dt class="mt-1 text-xs leading-snug text-brand-100/75 sm:text-sm" data-i18n="hero.t3">LED ekran Buxoroda</dt>
         </div>
       </dl>
@@ -236,8 +284,8 @@
 
           <figcaption class="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-4 p-4 sm:p-5">
             <div class="min-w-0">
-              <p id="hero-cap-title" class="truncate font-display text-base font-bold sm:text-lg">Mondelux</p>
-              <p id="hero-cap-desc" class="truncate text-xs text-brand-100/80 sm:text-sm">Oshxona mebellari saloni · yorug‘likli hajmli harflar</p>
+              <p id="hero-cap-title" data-i18n-fx class="truncate font-display text-base font-bold sm:text-lg">Mondelux</p>
+              <p id="hero-cap-desc" data-i18n-fx class="truncate text-xs text-brand-100/80 sm:text-sm">Oshxona mebellari saloni · yorug‘likli hajmli harflar</p>
             </div>
             <div class="flex shrink-0 items-center gap-1.5 pb-1.5" id="hero-dots" aria-hidden="true">
               <span class="screen-dot is-active"></span><span class="screen-dot"></span><span class="screen-dot"></span><span class="screen-dot"></span>
@@ -255,7 +303,7 @@
 <!-- LED yugurma satr: kursor ustida to'xtaydi, sichqoncha yoki barmoq bilan suriladi -->
 <div class="led-ticker py-4" id="ticker-wrap" aria-hidden="true">
   <div class="led-ticker-glow">
-    <div class="marquee-track animate-marquee" id="ticker" style="--marquee-time:46s"></div>
+    <div class="marquee-track animate-marquee" id="ticker" data-i18n-fx style="--marquee-time:46s"></div>
   </div>
 </div>
 
@@ -307,12 +355,13 @@
   <!-- ishlab chiqarishdan lavhalar -->
   <div class="container-site relative mt-16 grid gap-3 sm:mt-24 sm:grid-cols-3 sm:gap-5 lg:grid-cols-[1.5fr_1fr_1fr]">
     <figure class="group relative h-52 overflow-hidden rounded-3xl border border-white/10 sm:h-60" data-reveal>
-      <img src="assets/img/about/ishlab-chiqarish.webp" alt="" width="800" height="374" loading="lazy" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
-      <figcaption class="chip absolute bottom-3 left-3" data-i18n="about.ph1">Hajmli harflar ishlab chiqarish sexi</figcaption>
+      <!-- Stella sexi: 3,2 m keng formatli solvent printerda bilbord banneri (flex) bosilmoqda -->
+      <img src="assets/img/about/keng-formatli-bosma.webp" alt="" width="800" height="451" loading="lazy" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
+      <figcaption class="chip absolute bottom-3 left-3" data-i18n="about.ph1">Bilbord bannerlarini bosma sexi</figcaption>
     </figure>
     <figure class="group relative h-52 overflow-hidden rounded-3xl border border-white/10 sm:h-60" data-reveal style="--d:100ms">
-      <img src="assets/img/about/keng-formatli-bosma.webp" alt="" width="800" height="451" loading="lazy" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
-      <figcaption class="chip absolute bottom-3 left-3" data-i18n="about.ph2">Keng formatli bosma</figcaption>
+      <img src="assets/img/portfolio/banner-montaji.webp" alt="" width="800" height="374" loading="lazy" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
+      <figcaption class="chip absolute bottom-3 left-3" data-i18n="about.ph2">Banner montaji</figcaption>
     </figure>
     <figure class="group relative h-52 overflow-hidden rounded-3xl border border-white/10 sm:h-60" data-reveal style="--d:200ms">
       <img src="assets/img/about/shourum.webp" alt="" width="800" height="451" loading="lazy" class="h-full w-full object-cover transition duration-700 group-hover:scale-105">
@@ -401,49 +450,54 @@
       <p class="section-sub" data-reveal style="--d:140ms" data-i18n="services.sub">G‘oyadan montajgacha: loyihalaymiz, ishlab chiqaramiz, o‘rnatamiz va xizmat ko‘rsatamiz.</p>
     </div>
 
-    <div id="services-grid" class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+    <div id="services-grid" data-i18n-fx class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
     <noscript><p class="mt-10 text-brand-100/85">Hajmli harflar, neon reklamalar, banner va setka, Oracal bosma, sahna va dekor, poligrafiya, stella (pilon), avto brending, brending va korporativ uslub, dizayn, LED ekran reklamasi, bilbord reklamasi, transport reklamasi.</p></noscript>
 
-    <!-- LED ekranlar tarmog'i -->
+    <!-- Reklama joylari tarmog'i: chapda tur (LED / bilbord / avtobus / bekat) va manzillar, o'ngda Yandex xarita -->
     <div id="led" class="theme-dark relative mt-16 overflow-hidden rounded-[2rem] border border-neon-300/30 p-6 sm:p-10 lg:mt-24 lg:p-14" data-reveal style="background: radial-gradient(40rem 22rem at 100% 0%, rgba(154,92,255,.45), transparent 60%), linear-gradient(135deg, #4A2E80 0%, #3C2482 50%, #2B174D 100%); box-shadow: 0 0 80px -20px rgba(154,92,255,.6);">
       <div class="bg-dots pointer-events-none absolute inset-0 opacity-60 [mask-image:linear-gradient(90deg,transparent,#000)]" aria-hidden="true"></div>
       <div class="relative">
         <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
+          <div id="ads-head" data-i18n-fx>
             <p class="eyebrow">
               <svg class="ico-fill" aria-hidden="true"><use href="#i-star"/></svg>
-              <span data-i18n="led.eyebrow">LED ekranlar tarmog‘i</span>
+              <span data-i18n="ads.eyebrow">Reklama joylari tarmog‘i</span>
             </p>
-            <h3 class="mt-4 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl" data-i18n-html="led.title">Buxoro bo‘ylab <span class="neon-text">18 ta</span> LED ekran</h3>
-            <p class="mt-4 max-w-xl text-base leading-relaxed text-brand-100/85 sm:text-lg" data-i18n="led.sub">Reklamangiz shaharning eng gavjum chorrahalarida — kunu tun minglab haydovchi va yo‘lovchilar ko‘z o‘ngida.</p>
+            <h3 id="ads-title" class="mt-4 text-3xl font-extrabold leading-[1.1] tracking-tight sm:text-4xl">Buxoro bo‘ylab <span class="neon-text">21 ta</span> LED ekran</h3>
+            <p id="ads-sub" class="mt-4 max-w-xl text-base leading-relaxed text-brand-100/85 sm:text-lg">Reklamangiz shaharning eng gavjum chorrahalarida — kunu tun minglab haydovchi va yo‘lovchilar ko‘z o‘ngida.</p>
           </div>
-          <a href="#contact" class="btn btn-primary shrink-0 self-start lg:self-auto" data-service="led">
-            <span data-i18n="led.cta">LED ekranda reklama berish</span>
+          <a href="#contact" id="ads-cta" class="btn btn-primary shrink-0 self-start lg:self-auto" data-service="led">
+            <span id="ads-cta-text" data-i18n-fx>LED ekranda reklama berish</span>
             <svg class="ico btn-arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
           </a>
         </div>
 
-        <!-- manzil tanlanadi — Yandex xaritada joylashuvi ko'rinadi -->
-        <div class="mt-8 grid gap-4 lg:grid-cols-[21rem_minmax(0,1fr)] lg:gap-5">
-          <div class="overflow-hidden rounded-3xl border border-white/15 bg-brand-950/40 lg:order-2">
-            <iframe id="led-map" class="block h-72 w-full border-0 sm:h-96 lg:h-[30rem]" title="LED ekranlar xaritasi" data-i18n-attr="title:led.map" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <!-- tur tanlanadi → manzil tanlanadi → Yandex xaritada joylashuvi ko'rinadi -->
+        <div class="mt-8 grid gap-4 lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-5">
+          <div class="flex min-w-0 flex-col gap-3">
+            <div id="ads-tabs" data-i18n-fx class="ads-tabs" role="tablist" aria-label="Reklama turi" data-i18n-attr="aria-label:ads.tabs"></div>
+            <div id="ads-list" data-i18n-fx class="led-list" role="tabpanel"></div>
+          </div>
+          <div class="overflow-hidden rounded-3xl border border-white/15 bg-brand-950/40">
+            <!-- Yandex Maps JS API xaritasi (tanlangan LED ekran nuqtasida uning rasmi); API yuklanmasa — pastdagi oddiy vidjet -->
+            <div id="ads-ymap" class="h-72 w-full sm:h-96 lg:h-[30rem]" hidden></div>
+            <iframe id="ads-map" class="block h-72 w-full border-0 sm:h-96 lg:h-[30rem]" title="LED ekranlar xaritasi" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
             <div class="flex flex-col gap-3 border-t border-white/10 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
               <div class="flex min-w-0 items-start gap-3.5">
                 <span class="contact-ico !h-9 !w-9"><svg class="ico" aria-hidden="true"><use href="#i-pin"/></svg></span>
                 <div class="min-w-0" aria-live="polite">
-                  <p id="led-cur-title" class="font-display text-sm font-bold sm:text-base" data-i18n="led.all">Barcha ekranlar</p>
-                  <p id="led-cur-desc" class="mt-0.5 text-xs leading-snug text-brand-100/75 sm:text-sm" data-i18n="led.pick">Ekranni tanlang — aniq joylashuvi xaritada ko‘rinadi</p>
+                  <p id="ads-cur-title" data-i18n-fx class="font-display text-sm font-bold sm:text-base">Barcha ekranlar</p>
+                  <p id="ads-cur-desc" data-i18n-fx class="mt-0.5 text-xs leading-snug text-brand-100/75 sm:text-sm">Ekranni tanlang — aniq joylashuvi xaritada ko‘rinadi</p>
                 </div>
               </div>
-              <a id="led-open" href="https://yandex.uz/maps/10330/bukhara/" target="_blank" rel="noopener" class="btn btn-glass btn-sm shrink-0 self-start sm:self-auto">
-                <span data-i18n="led.open">Yandex xaritada ochish</span>
+              <a id="ads-open" href="https://yandex.uz/maps/10330/bukhara/" target="_blank" rel="noopener" class="btn btn-glass btn-sm shrink-0 self-start sm:self-auto">
+                <span data-i18n="ads.open">Yandex xaritada ochish</span>
                 <svg class="ico btn-arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
               </a>
             </div>
           </div>
-          <div id="led-list" class="led-list lg:order-1"></div>
         </div>
-        <noscript><p class="mt-6 text-sm text-brand-100/85">LED ekranlar manzillari: Gorgaz, Savdo majmuasi, Konechka, Sitora park, Karvon bozor, Media Park, Edem, Monika, Sherbudin, Med kollej, BDU, Varaxsha, Texnologiya instituti, Madaniy markaz, G‘ijduvon bozori, Yoshlar bog‘i.</p></noscript>
+        <noscript><p class="mt-6 text-sm text-brand-100/85">LED ekranlar manzillari: Gorgaz, Savdo majmuasi, Konechka, Sitora park, Karvon bozor, Media Park, Edem, Monika, Sherbudin, Med kollej, BDU, Varaxsha, Texnologiya instituti, Madaniy markaz, Salomon Merodov, Temiryo‘l vokzali (Kogon), Dorixona (Kogon), G‘ijduvon bozori, Yoshlar bog‘i.</p></noscript>
       </div>
     </div>
   </div>
@@ -468,17 +522,17 @@
     </div>
 
     <div class="-mx-5 mt-10 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden" data-reveal>
-      <div id="pf-filters" class="flex gap-2 sm:flex-wrap" role="group" aria-label="Portfolio"></div>
+      <div id="pf-filters" data-i18n-fx class="flex gap-2 sm:flex-wrap" role="group" aria-label="Portfolio"></div>
     </div>
 
-    <div id="pf-grid" class="pf-grid mt-8" aria-live="polite"></div>
+    <div id="pf-grid" data-i18n-fx class="pf-grid mt-8" aria-live="polite"></div>
     <noscript><p class="mt-8 text-brand-100/85">Ishlarimizni Telegram kanalimizda ko‘rishingiz mumkin: <a class="underline" href="https://t.me/stella_uzb">t.me/stella_uzb</a></p></noscript>
 
     <div class="mt-10 flex flex-col items-center gap-3">
       <button type="button" id="pf-more" class="btn btn-glass" hidden>
         <span data-i18n="portfolio.more">Yana ko‘rsatish</span>
       </button>
-      <p id="pf-count" class="text-xs text-white/50"></p>
+      <p id="pf-count" data-i18n-fx class="text-xs text-white/50"></p>
     </div>
   </div>
 </section>
@@ -610,7 +664,7 @@
         </div>
         <div>
           <label class="field-label" for="f-service" data-i18n="form.service">Xizmat turi</label>
-          <select class="field" id="f-service" name="service" required aria-describedby="f-service-err">
+          <select class="field" id="f-service" data-i18n-fx name="service" required aria-describedby="f-service-err">
             <option value="" data-i18n="form.service.ph">Xizmatni tanlang</option>
           </select>
           <p class="field-error" id="f-service-err" hidden></p>
@@ -783,5 +837,6 @@
 <script src="assets/js/data.js" defer></script>
 <script src="assets/js/portfolio-data.js" defer></script>
 <script src="assets/js/main.js" defer></script>
+<script src="assets/js/scene.js" defer></script>
 </body>
 </html>
