@@ -421,8 +421,13 @@
   // rasm pastki o'rtasi aynan nuqtaga tushadi (ustun / bekat poli)
   const PINS = {
     led: { href: 'assets/img/led-pin.png', w: 96, h: 108 },
+    billboard: { href: 'assets/img/billboard-pin.png', w: 100, h: 128 },
     stop: { href: 'assets/img/stop-pin.png', w: 220, h: 94 },
   };
+  // joyning slayd-rasmlari (hozircha bilbordlarda): kichik nusxa ro'yxat va panelda, kattasi rasm ko'rish oynasida
+  const AD_IMG = 'assets/img/billboards/';
+  const adThumb = (file) => AD_IMG + file.replace(/\.webp$/, '-sm.webp');
+  const adSlides = (p) => (p.photos || []).map((file) => ({ src: AD_IMG + file, cat: 'outdoor', w: 1600, h: 900, uz: p.uz, ru: p.ru, en: p.en }));
   const ymap = { state: 'idle', map: null };
 
   function loadYmaps() {
@@ -502,6 +507,15 @@
     }
     $('#ads-cur-title').textContent = title;
     $('#ads-cur-desc').textContent = desc;
+    const photos = $('#ads-photos');
+    if (photos) {
+      const files = (p && p.photos) || [];
+      photos.hidden = !files.length;
+      photos.innerHTML = files.map((file, k) => `
+        <button type="button" class="ads-photo" data-photo="${k}" aria-label="${esc(t('ads.photo', { n: k + 1 }))}">
+          <img src="${esc(adThumb(file))}" alt="${esc(tr(p)[0] + ' — ' + t('ads.photo', { n: k + 1 }))}" width="320" height="180" loading="lazy" decoding="async">
+        </button>`).join('');
+    }
     $('#ads-open').setAttribute('href', adsMapUrl(p, false));
   }
 
@@ -540,16 +554,16 @@
           <a href="tel:${esc(CFG.phone || '')}" class="btn btn-glass btn-sm mt-5">${icon('i-phone')}<span>${esc(CFG.phoneDisplay || '')}</span></a>
         </div>`;
     } else {
-      const item = (i, badge, title, desc, k) => `
+      const item = (i, badge, title, desc, k, thumb) => `
         <button type="button" class="led-item${fx(k)}" data-ad="${i}" aria-pressed="false">
-          <span class="led-num">${badge}</span>
+          <span class="led-num${thumb ? ' led-thumb' : ''}">${thumb ? `<img src="${esc(thumb)}" alt="" width="320" height="180" loading="lazy" decoding="async"><span>${badge}</span>` : badge}</span>
           <span class="min-w-0">
             <span class="block font-display text-sm font-bold">${esc(title)}</span>
             <span class="mt-0.5 block text-xs leading-snug text-brand-100/75">${esc(desc)}</span>
           </span>
         </button>`;
       list.innerHTML = item(-1, icon('i-pin'), adKey('all'), t('ads.count', { n: n.items.length }), 0)
-        + n.items.map((p, i) => item(i, i + 1, tr(p)[0], tr(p)[1], i + 1)).join('');
+        + n.items.map((p, i) => item(i, i + 1, tr(p)[0], tr(p)[1], i + 1, p.photos && p.photos.length ? adThumb(p.photos[0]) : '')).join('');
     }
     list.scrollTop = 0;
     list.scrollLeft = 0;
@@ -603,6 +617,12 @@
       if (btn) showAd(Number(btn.getAttribute('data-ad')));
     });
     list.addEventListener('animationend', (e) => { if (e.target.classList) e.target.classList.remove('is-entering'); });
+    const photos = $('#ads-photos');
+    if (photos) photos.addEventListener('click', (e) => {
+      const b = e.target.closest('.ads-photo');
+      const p = ads.net.items[ads.index];
+      if (b && p) openLightbox(adSlides(p), Number(b.getAttribute('data-photo')));
+    });
   }
 
   /* ---------------- xizmatlar ---------------- */
@@ -793,12 +813,14 @@
   /* ---------------- rasm ko'rish oynasi ---------------- */
   const lb = $('#lightbox');
   const lbState = { list: [], index: 0 };
+  // portfolio ishlari — file (portfolio papkasidan), boshqa rasmlar (masalan, bilbord slaydlari) — to'liq src
+  const lbSrc = (w) => w.src || IMG + w.file;
 
   function fillLightbox() {
     const w = lbState.list[lbState.index];
     if (!w) return;
     const img = $('#lb-img');
-    img.src = IMG + w.file;
+    img.src = lbSrc(w);
     img.alt = `${tr(w)[0]} — ${tr(w)[1]}`;
     img.width = w.w;
     img.height = w.h;
@@ -812,7 +834,7 @@
     // qo'shni rasmlarni oldindan yuklash
     [1, -1].forEach((d) => {
       const n = lbState.list[(lbState.index + d + lbState.list.length) % lbState.list.length];
-      if (n) new Image().src = IMG + n.file;
+      if (n) new Image().src = lbSrc(n);
     });
   }
 

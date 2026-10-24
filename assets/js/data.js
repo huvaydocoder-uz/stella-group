@@ -386,9 +386,70 @@ window.STELLA_LED = [
   { size: [6, 3], ll: [40.1026863, 64.6822726], city: 'gj', uz: ['Yoshlar bog‘i', 'Alpomish va XXI asr ko‘chalari kesishmasi'], ru: ['Парк молодёжи', 'Пересечение улиц Алпомиш и XXI аср'], en: ['Youth Park', 'Alpomish St & XXI asr St intersection'] },
 ];
 
-/* Bilbordlar. Namuna:
-   { size: [6, 3], ll: [39.7747, 64.4286], city: 'bx', uz: ['Nomi', 'Manzili'], ru: ['Название', 'Адрес'], en: ['Name', 'Address'] }, */
-window.STELLA_BILLBOARDS = [];
+/* Bilbordlar (koordinatalar: slayddagi QR kodlar). Namuna:
+   { size: [6, 3], ll: [39.7747, 64.4286], city: 'bx', photos: ['fayl.webp'], uz: ['Nomi', 'Manzili'], ru: ['Название', 'Адрес'], en: ['Name', 'Address'] },
+   photos — assets/img/billboards/ dagi slaydlar (bilbordning tomonlari); har biri uchun "-sm" kichik nusxasi ham bo'lishi kerak.
+   Korzinka QR kodlari Google ko'cha panoramasiga olib boradi — nuqtalar panorama yo'nalishlari va slayddagi xaritadan aniqlangan. */
+window.STELLA_BILLBOARDS = [
+  { size: [6, 3], ll: [39.749156, 64.423558], city: 'bx', photos: ['mega-market-a-1.webp', 'mega-market-a-2.webp'], uz: ['Mega market A', 'Navoiy shoh ko‘chasi, Mega market oldida'], ru: ['Mega market A', 'Улица Навои шох, напротив Mega market'], en: ['Mega market A', 'Navoiy Shoh St, in front of Mega market'] },
+  { size: [6, 3], ll: [39.749173, 64.42355], city: 'bx', photos: ['mega-market-b-1.webp', 'mega-market-b-2.webp'], uz: ['Mega market B', 'Navoiy shoh ko‘chasi, Mega market oldida'], ru: ['Mega market B', 'Улица Навои шох, напротив Mega market'], en: ['Mega market B', 'Navoiy Shoh St, in front of Mega market'] },
+  { size: [6, 3], ll: [39.74878, 64.41643], city: 'bx', photos: ['korzinka-a1.webp'], uz: ['Korzinka A1', 'Abdurahmon Jomiy ko‘chasi, Korzinka (Buxoro-3) yonida'], ru: ['Korzinka A1', 'Улица Абдурахмана Джами, у Korzinka (Бухара-3)'], en: ['Korzinka A1', 'Abdurahmon Jomiy St, near Korzinka (Bukhara-3)'] },
+  { size: [6, 3], ll: [39.74884, 64.41783], city: 'bx', photos: ['korzinka-a2-1.webp', 'korzinka-a2-2.webp'], uz: ['Korzinka A2', 'Abdurahmon Jomiy ko‘chasi chorrahasi, Korzinka (Buxoro-3) yonida'], ru: ['Korzinka A2', 'Перекрёсток улицы Абдурахмана Джами, у Korzinka (Бухара-3)'], en: ['Korzinka A2', 'Abdurahmon Jomiy St intersection, near Korzinka (Bukhara-3)'] },
+  { size: [6, 3], ll: [39.780944, 64.402944], city: 'bx', photos: ['azamat-a1.webp'], uz: ['Azamat chorrahasi A1', 'Sulaymon Murodov ko‘chasi, Azamat magazini chorrahasi'], ru: ['Перекрёсток «Азамат» A1', 'Улица Сулеймана Мурадова, перекрёсток у магазина «Азамат»'], en: ['Azamat crossroads A1', 'Sulaymon Murodov St, Azamat store crossroads'] },
+  { size: [8, 4], ll: [39.762479, 64.423276], city: 'bx', photos: ['bdu-a-1.webp', 'bdu-a-2.webp'], uz: ['BDU A', 'Muhammad Iqbol ko‘chasi, BDU oldida'], ru: ['БухГУ A', 'Улица Мухаммада Икбола, напротив БухГУ'], en: ['BSU A', 'Muhammad Iqbol St, in front of BSU'] },
+  { size: [6, 3], ll: [39.761924, 64.424185], city: 'bx', photos: ['bdu-b-1.webp', 'bdu-b-2.webp'], uz: ['BDU B', 'Navoiy shoh ko‘chasi, BDU oldida'], ru: ['БухГУ B', 'Улица Навои шох, напротив БухГУ'], en: ['BSU B', 'Navoiy Shoh St, in front of BSU'] },
+  { size: [6, 3], ll: [39.762508, 64.421703], city: 'bx', photos: ['bdu-c.webp'], uz: ['BDU C', 'Muhammad Iqbol ko‘chasi, Buxoro davlat universiteti'], ru: ['БухГУ C', 'Улица Мухаммада Икбола, Бухарский государственный университет'], en: ['BSU C', 'Muhammad Iqbol St, Bukhara State University'] },
+  { size: [6, 3], ll: [39.7625, 64.422611], city: 'bx', photos: ['bdu-darvoza.webp'], uz: ['BDU darvozasi', 'Muhammad Iqbol ko‘chasi, BuxDU darvozasi oldida'], ru: ['Ворота БухГУ', 'Улица Мухаммада Икбола, у ворот БухГУ'], en: ['BSU gate', 'Muhammad Iqbol St, at the BSU gate'] },
+  { size: [6, 3], ll: [39.780028, 64.429944], city: 'bx', photos: ['tibbiyot-a1.webp', 'tibbiyot-a2.webp'], uz: ['Tibbiyot markazi', 'Islom Karimov ko‘chasi, viloyat bolalar ko‘p tarmoqli tibbiyot markazi oldida'], ru: ['Медицинский центр', 'Улица Ислама Каримова, у областного детского многопрофильного медцентра'], en: ['Medical centre', 'Islam Karimov St, by the regional children’s multidisciplinary medical centre'] },
+  // QR kodda aniq nuqta yo'q (faqat panorama) — joy panorama yo'nalishi bo'yicha taxminan olingan
+  { size: [6, 3], ll: [39.771585, 64.441518], city: 'bx', photos: ['dxa-1.webp', 'dxa-2.webp'], uz: ['DXA chorrahasi', 'Bahouddin Naqshband ko‘chasi, Davlat xizmatlari agentligi chorrahasi'], ru: ['Перекрёсток ЦГУ', 'Улица Бахауддина Накшбанда, перекрёсток у Агентства госуслуг'], en: ['Public Services crossroads', 'Bahouddin Naqshband St, Public Services Agency crossroads'] },
+  { size: [6, 3], ll: [39.766083, 64.441278], city: 'bx', photos: ['fatxobod-mominov-a1.webp', 'fatxobod-mominov-a2.webp'], uz: ['Fatxobod masjidi — I. Mo‘minov', 'Ibrohim Mo‘minov ko‘chasi, Fatxobod masjidi chorrahasi'], ru: ['Мечеть Фатхабад — И. Муминов', 'Улица Ибрагима Муминова, перекрёсток у мечети Фатхабад'], en: ['Fatxobod Mosque — I. Muminov', 'Ibrohim Muminov St, Fatxobod Mosque crossroads'] },
+  { size: [6, 3], ll: [39.766139, 64.442083], city: 'bx', photos: ['fatxobod-tanish-a1.webp', 'fatxobod-tanish-a2.webp'], uz: ['Fatxobod masjidi — Xafiz Tanish', 'Xafiz Tanish ko‘chasi, Fatxobod masjidi chorrahasi'], ru: ['Мечеть Фатхабад — Хафиз Таныш', 'Улица Хафиза Таныша, перекрёсток у мечети Фатхабад'], en: ['Fatxobod Mosque — Hafiz Tanish', 'Hafiz Tanish St, Fatxobod Mosque crossroads'] },
+  { size: [6, 3], ll: [39.76925, 64.453194], city: 'bx', photos: ['shahar-shifoxonasi-a1.webp'], uz: ['Markaziy shahar shifoxonasi', 'Bahouddin Naqshband ko‘chasi, markaziy shahar shifoxonasi (Gor bolnitsa)'], ru: ['Центральная горбольница', 'Улица Бахауддина Накшбанда, центральная городская больница'], en: ['Central City Hospital', 'Bahouddin Naqshband St, Central City Hospital'] },
+  { size: [6, 3], ll: [39.763848, 64.430667], city: 'bx', photos: ['gorgaz-sofiya-1.webp', 'gorgaz-sofiya-2.webp'], uz: ['Gorgaz — Sofiya', 'Mustaqillik ko‘chasi, Gorgaz, Sofiya ro‘parasida'], ru: ['Горгаз — Sofiya', 'Улица Мустакиллик, «Горгаз», напротив Sofiya'], en: ['Gorgaz — Sofiya', 'Mustaqillik St, Gorgaz, opposite Sofiya'] },
+  // QR kodlarda aniq nuqta yo'q (chorrahaning ikki tomonidagi panoramalar) — joy ikkala panorama bo'yicha taxminan olingan
+  { size: [6, 3], ll: [39.762928, 64.430713], city: 'bx', photos: ['gorgaz-kinoteatr.webp', 'gorgaz-kinoteatr-2.webp'], uz: ['Gorgaz kinoteatri', 'Mustaqillik ko‘chasi, Gorgaz kinoteatri chorrahasi'], ru: ['Кинотеатр «Горгаз»', 'Улица Мустакиллик, перекрёсток у кинотеатра «Горгаз»'], en: ['Gorgaz Cinema', 'Mustaqillik St, Gorgaz Cinema crossroads'] },
+  { size: [6, 3], ll: [39.781278, 64.403361], city: 'bx', photos: ['kalxoz-a1.webp', 'kalxoz-a2.webp'], uz: ['Kalxoz bozori chorrahasi', 'M. Karimov ko‘chasi, Kalxoz bozori chorrahasi'], ru: ['Перекрёсток Колхозного рынка', 'Улица М. Каримова, перекрёсток у Колхозного рынка'], en: ['Kolkhoz Bazaar crossroads', 'M. Karimov St, Kolkhoz Bazaar crossroads'] },
+  // slaydlarda o'lcham har xil yozilgan (800x400 va 600x300) — 1-slayddagisi olindi
+  { size: [8, 4], ll: [39.752095, 64.405442], city: 'bx', photos: ['karmen-1.webp', 'karmen-2.webp'], uz: ['Karmen klinikasi', 'Namozgoh ko‘chasi, Karmen klinikasi oldida'], ru: ['Клиника «Кармен»', 'Улица Намазгох, напротив клиники «Кармен»'], en: ['Karmen Clinic', 'Namozgoh St, in front of Karmen Clinic'] },
+  { size: [6, 3], ll: [39.805757, 64.428484], city: 'bx', photos: ['karvon-stoyanka.webp', 'karvon-stoyanka-2.webp'], uz: ['Karvon bozori to‘xtash joyi', 'M37 yo‘li, Karvon bozori avtoturargohi'], ru: ['Стоянка рынка «Карвон»', 'Трасса M37, стоянка рынка «Карвон»'], en: ['Karvon Bazaar car park', 'M37 road, Karvon Bazaar car park'] },
+  { size: [6, 3], ll: [39.812972, 64.431556], city: 'bx', photos: ['karvon-chindan-1.webp', 'karvon-chindan-2.webp'], uz: ['Karvon — Chindan', 'M37 yo‘li, Chindan oldida'], ru: ['Карвон — Chindan', 'Трасса M37, напротив Chindan'], en: ['Karvon — Chindan', 'M37 road, in front of Chindan'] },
+  { size: [6, 3], ll: [39.803583, 64.427611], city: 'bx', photos: ['karvon-chorraha-1.webp', 'karvon-chorraha-2.webp'], uz: ['Karvon bozori chorrahasi', 'G‘ijduvon ko‘chasi, Karvon bozori chorrahasi, svetofor oldida'], ru: ['Перекрёсток рынка «Карвон»', 'Улица Гиждуван, перекрёсток рынка «Карвон», у светофора'], en: ['Karvon Bazaar crossroads', 'G‘ijduvon St, Karvon Bazaar crossroads, by the traffic lights'] },
+  { size: [6, 3], ll: [39.803639, 64.428056], city: 'bx', photos: ['karvon-m37-a1.webp', 'karvon-m37-a2.webp'], uz: ['Karvon bozori chorrahasi — M37', 'M37 yo‘li, Karvon bozori chorrahasi'], ru: ['Перекрёсток рынка «Карвон» — M37', 'Трасса M37, перекрёсток рынка «Карвон»'], en: ['Karvon Bazaar crossroads — M37', 'M37 road, Karvon Bazaar crossroads'] },
+  { size: [6, 3], ll: [39.806688, 64.429214], city: 'bx', photos: ['med-institut-1.webp', 'med-institut-2.webp'], uz: ['Karvon — tibbiyot instituti', 'M37 yo‘li, Buxoro davlat tibbiyot instituti oldida'], ru: ['Карвон — медицинский институт', 'Трасса M37, напротив Бухарского медицинского института'], en: ['Karvon — Medical Institute', 'M37 road, in front of Bukhara State Medical Institute'] },
+  { size: [6, 3], ll: [39.807583, 64.429778], city: 'bx', photos: ['karvon-bekat-a1.webp'], uz: ['Karvon bozori avtobus bekati', 'M37 yo‘li, Karvon bozori avtobus bekati'], ru: ['Остановка «Карвон базар»', 'Трасса M37, автобусная остановка «Карвон базар»'], en: ['Karvon Bazaar bus stop', 'M37 road, Karvon Bazaar bus stop'] },
+  // QR kodlarda aniq nuqta yo'q (A1 va A2 panoramalari) — joy ikkala panorama yo'nalishlari kesishmasidan olingan
+  { size: [6, 3], ll: [39.762432, 64.42481], city: 'bx', photos: ['kitoblar-olami-a1.webp', 'kitoblar-olami-a2.webp'], uz: ['Kitoblar olami ro‘parasi', 'Muhammad Iqbol ko‘chasi, Kitoblar olami ro‘parasida'], ru: ['Напротив «Китоблар олами»', 'Улица Мухаммада Икбола, напротив магазина «Китоблар олами»'], en: ['Opposite Kitoblar Olami', 'Muhammad Iqbol St, opposite Kitoblar Olami bookstore'] },
+  { size: [6, 3], ll: [39.766667, 64.404361], city: 'bx', photos: ['abdulazizxon-1.webp', 'abdulazizxon-2.webp'], uz: ['Abdulazizxon masjidi', 'Jo‘ybor ko‘chasi, Abdulazizxon masjidi yonida'], ru: ['Мечеть Абдулазизхана', 'Улица Джуйбар, у мечети Абдулазизхана'], en: ['Abdulaziz Khan Mosque', 'Jo‘ybor St, near Abdulaziz Khan Mosque'] },
+  { size: [6, 3], ll: [39.779875, 64.399345], city: 'bx', photos: ['markaziy-bozor-darvoza-1.webp', 'markaziy-bozor-darvoza-2.webp'], uz: ['Markaziy bozor darvozasi', 'Sulaymon Murodov ko‘chasi, Markaziy bozor darvozasi oldida'], ru: ['Ворота Центрального рынка', 'Улица Сулеймана Мурадова, у ворот Центрального рынка'], en: ['Central Bazaar gate', 'Sulaymon Murodov St, by the Central Bazaar gate'] },
+  { size: [6, 3], ll: [39.775266, 64.389471], city: 'bx', photos: ['markaziy-bozor-vodokanal.webp', 'markaziy-bozor-vodokanal-2.webp'], uz: ['Markaziy bozor — Vodokanal', 'Sulaymon Murodov ko‘chasi, Vodokanal oldida'], ru: ['Центральный рынок — Водоканал', 'Улица Сулеймана Мурадова, у Водоканала'], en: ['Central Bazaar — Water utility', 'Sulaymon Murodov St, by the water utility office'] },
+  { size: [6, 3], ll: [39.783444, 64.415028], city: 'bx', photos: ['maroqand.webp', 'maroqand-2.webp', 'maroqand-3.webp'], uz: ['Samarqandskiy — Maroqand', 'Sulaymon Murodov ko‘chasi, Maroqand restorani chorrahasi'], ru: ['Самаркандский — «Мароканд»', 'Улица Сулеймана Мурадова, перекрёсток у ресторана «Мароканд»'], en: ['Samarkandskiy — Maroqand', 'Sulaymon Murodov St, Maroqand restaurant crossroads'] },
+  { size: [6, 3], ll: [39.782194, 64.426722], city: 'bx', photos: ['mironshox-1.webp', 'mironshox-2.webp'], uz: ['Samarqandskiy — Mironshox', 'Sulaymon Murodov ko‘chasi, Mironshox restorani ro‘parasida'], ru: ['Самаркандский — «Мироншох»', 'Улица Сулеймана Мурадова, напротив ресторана «Мироншох»'], en: ['Samarkandskiy — Mironshox', 'Sulaymon Murodov St, opposite Mironshox restaurant'] },
+  { size: [6, 3], ll: [39.780861, 64.4295], city: 'bx', photos: ['minor-a1.webp', 'minor-a2.webp'], uz: ['Minor ro‘parasi', 'Nisomi ko‘chasi, Minor ro‘parasida'], ru: ['Напротив «Минор»', 'Улица Низами, напротив «Минор»'], en: ['Opposite Minor', 'Nisomi St, opposite Minor'] },
+  // QR kodlarda aniq nuqta yo'q (ko'chadagi ikki panorama) — joy panoramalar va slayddagi xarita bo'yicha taxminan olingan
+  { size: [6, 3], ll: [39.77487, 64.43106], city: 'bx', photos: ['mittivoy-a1.webp', 'mittivoy-a2.webp'], uz: ['Mittivoy oldida', 'Nisomi ko‘chasi, Mittivoy oldida'], ru: ['У «Миттивой»', 'Улица Низами, у «Миттивой»'], en: ['By Mittivoy', 'Nisomi St, by Mittivoy'] },
+  { size: [6, 3], ll: [39.769806, 64.451028], city: 'bx', photos: ['monika-a1.webp', 'monika-a2.webp'], uz: ['Monika chorrahasi', 'Bahouddin Naqshband ko‘chasi, Monika chorrahasi'], ru: ['Перекрёсток «Моника»', 'Улица Бахауддина Накшбанда, перекрёсток «Моника»'], en: ['Monika crossroads', 'Bahouddin Naqshband St, Monika crossroads'] },
+  { size: [6, 3], ll: [39.742102, 64.446772], city: 'bx', photos: ['moshin-bozor-benzin-a1.webp', 'moshin-bozor-benzin-a2.webp'], uz: ['Moshin bozor — benzin shoxobchasi', 'Xalqlar do‘stligi ko‘chasi, benzin shoxobchasi oldida'], ru: ['Авторынок — АЗС', 'Улица Халклар дустлиги, у АЗС'], en: ['Car market — filling station', 'Xalqlar do‘stligi St, by the filling station'] },
+  // slaydlardagi QR kod xato (DXA chorrahasi panoramasi) — nuqta slayddagi xarita va OSM bo'yicha taxminan olingan
+  { size: [6, 3], ll: [39.73375, 64.45135], city: 'bx', photos: ['moshin-bozor-a1.webp', 'moshin-bozor-a2.webp'], uz: ['Moshin bozor chorrahasi', 'Xalqlar do‘stligi ko‘chasi, Moshin bozor chorrahasi'], ru: ['Перекрёсток авторынка', 'Улица Халклар дустлиги, перекрёсток у авторынка'], en: ['Car market crossroads', 'Xalqlar do‘stligi St, car market crossroads'] },
+  // QR kodda aniq nuqta yo'q (panorama) — joy panorama yo'nalishi bo'yicha taxminan olingan. Slaydlarda o'lcham har xil (600x300 va 800x400)
+  { size: [6, 3], ll: [39.7496, 64.40368], city: 'bx', photos: ['bdpi-1.webp', 'bdpi-2.webp'], uz: ['Pedagogika instituti', 'Namozgoh ko‘chasi, Buxoro davlat pedagogika instituti'], ru: ['Педагогический институт', 'Улица Намазгох, Бухарский государственный педагогический институт'], en: ['Pedagogical Institute', 'Namozgoh St, Bukhara State Pedagogical Institute'] },
+  // QR kodlarda aniq nuqta yo'q (A1 va A2 panoramalari) — joy ikkala panorama yo'nalishlari kesishmasidan olingan
+  { size: [6, 3], ll: [39.780282, 64.434821], city: 'bx', photos: ['evroshar-a1.webp', 'evroshar-a2.webp'], uz: ['Evroshar ro‘parasi', 'Sulaymon Murodov ko‘chasi, Evroshar ro‘parasida'], ru: ['Напротив «Евроshar»', 'Улица Сулеймана Мурадова, напротив «Евроshar»'], en: ['Opposite Evroshar', 'Sulaymon Murodov St, opposite Evroshar'] },
+  { size: [6, 3], ll: [39.749638, 64.437482], city: 'bx', photos: ['pasport-stol.webp'], uz: ['Pasport stoli chorrahasi', 'Mustaqillik ko‘chasi, pasport stoli chorrahasi'], ru: ['Перекрёсток паспортного стола', 'Улица Мустакиллик, перекрёсток у паспортного стола'], en: ['Passport office crossroads', 'Mustaqillik St, passport office crossroads'] },
+  // QR kodlarda aniq nuqta yo'q (1-QR nuqtasi Mironshox bilan bir xil — xato) — joy ikki tomon panoramalari kesishmasidan olingan
+  { size: [6, 3], ll: [39.783428, 64.424017], city: 'bx', photos: ['tamur.webp', 'tamur-2.webp'], uz: ['Samarqandskiy — Tamur', 'Sulaymon Murodov ko‘chasi, Tamur magazini ro‘parasida'], ru: ['Самаркандский — «Тамур»', 'Улица Сулеймана Мурадова, напротив магазина «Тамур»'], en: ['Samarkandskiy — Tamur', 'Sulaymon Murodov St, opposite Tamur store'] },
+  { size: [6, 3], ll: [39.783416, 64.421925], city: 'bx', photos: ['abu-xavs-1.webp', 'abu-xavs-2.webp'], uz: ['Samarqandskiy — Abu Xavs maktabi', 'Abu Ali ibn Sino ko‘chasi, Abu Xavs maktabi oldida'], ru: ['Самаркандский — школа Абу Хавс', 'Улица Абу Али ибн Сино, у школы Абу Хавс'], en: ['Samarkandskiy — Abu Xavs school', 'Abu Ali ibn Sino St, by Abu Xavs school'] },
+  // slaydlarda o'lcham har xil (800x400 va 600x300) — 1-slayddagisi olindi
+  { size: [8, 4], ll: [39.748718, 64.422993], city: 'bx', photos: ['sardoba-1.webp', 'sardoba-2.webp'], uz: ['Sardoba oldida', 'Navoiy ko‘chasi, Sardoba oldida'], ru: ['У «Сардоба»', 'Улица Навои, у «Сардоба»'], en: ['By Sardoba', 'Navoiy St, by Sardoba'] },
+  // QR kodlar xato (Moshin bozor nuqtasi va DXA panoramalari) — joy panoramalar va slayddagi xarita bo'yicha taxminan olingan
+  { size: [6, 3], ll: [39.772, 64.44128], city: 'bx', photos: ['sharq-korzinka-a1.webp', 'sharq-korzinka-a2.webp'], uz: ['Sharq Korzinka chorrahasi', 'Bahouddin Naqshband ko‘chasi, Sharq Korzinka chorrahasi'], ru: ['Перекрёсток Korzinka «Шарк»', 'Улица Бахауддина Накшбанда, перекрёсток у Korzinka «Шарк»'], en: ['Sharq Korzinka crossroads', 'Bahouddin Naqshband St, Sharq Korzinka crossroads'] },
+  { size: [6, 3], ll: [39.772405, 64.385867], city: 'bx', photos: ['shergiron-1.webp', 'shergiron-2.webp'], uz: ['Shergiron', 'Mirdo‘stim ko‘chasi, Shergiron'], ru: ['Шергирон', 'Улица Мирдустим, Шергирон'], en: ['Shergiron', 'Mirdo‘stim St, Shergiron'] },
+  { size: [6, 3], ll: [39.781385, 64.429011], city: 'bx', photos: ['sitora-a1.webp', 'sitora-a2.webp'], uz: ['Sitora bog‘i oldida', 'Sulaymon Murodov ko‘chasi, Sitora bog‘i oldida'], ru: ['У парка «Ситора»', 'Улица Сулеймана Мурадова, у парка «Ситора»'], en: ['By Sitora Park', 'Sulaymon Murodov St, by Sitora Park'] },
+  { size: [6, 3], ll: [39.755645, 64.424185], city: 'bx', photos: ['texnologiya-universiteti.webp'], uz: ['Texnologiya universiteti oldida', 'Navoiy shoh ko‘chasi, Texnologiya universiteti oldida'], ru: ['У Технологического университета', 'Улица Навои шох, у Технологического университета'], en: ['By the University of Technology', 'Navoiy Shoh St, by the University of Technology'] },
+  { size: [6, 3], ll: [39.760603, 64.447768], city: 'bx', photos: ['turon-a1.webp', 'turon-a2.webp'], uz: ['Turon mehmonxonasi oldida', 'Sergey Yurenev-Buxoriy ko‘chasi, Turon mehmonxonasi oldida'], ru: ['У гостиницы «Турон»', 'Улица Сергея Юренева-Бухорий, у гостиницы «Турон»'], en: ['By Turon Hotel', 'Sergey Yurenev-Buxoriy St, by Turon Hotel'] },
+  { size: [6, 3], ll: [39.78337, 64.451782], city: 'bx', photos: ['avtobaza-61.webp'], uz: ['61-avtobaza oldida', 'Gazli shoh ko‘chasi, Yangi hokimiyat, 61-avtobaza oldida'], ru: ['У автобазы № 61', 'Газлийское шоссе, новый хокимият, у автобазы № 61'], en: ['By Motor Depot 61', 'Gazli Hwy, new Hokimiyat, by Motor Depot 61'] },
+];
 
 /* Avtobuslar: shartnoma tuzilgan avtoparklar · ll — avtopark joylashuvi (Yandex xarita havolalaridan) */
 window.STELLA_BUS = [
@@ -512,6 +573,7 @@ window.STELLA_I18N = {
     'ads.stop.map': 'Bekatlar xaritasi',
     'ads.count': '{n} ta manzil xaritada',
     'ads.size': '{w} × {h} m',
+    'ads.photo': 'Rasm {n}',
     'ads.city.bx': 'Buxoro',
     'ads.city.gj': 'G‘ijduvon',
     'ads.city.kg': 'Kogon',
@@ -692,6 +754,7 @@ window.STELLA_I18N = {
     'ads.stop.map': 'Карта остановок',
     'ads.count': '{n} адресов на карте',
     'ads.size': '{w} × {h} м',
+    'ads.photo': 'Фото {n}',
     'ads.city.bx': 'Бухара',
     'ads.city.gj': 'Гиждуван',
     'ads.city.kg': 'Каган',
@@ -872,6 +935,7 @@ window.STELLA_I18N = {
     'ads.stop.map': 'Bus stop map',
     'ads.count': '{n} locations on the map',
     'ads.size': '{w} × {h} m',
+    'ads.photo': 'Photo {n}',
     'ads.city.bx': 'Bukhara',
     'ads.city.gj': 'G‘ijduvon',
     'ads.city.kg': 'Kagan',
