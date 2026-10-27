@@ -534,9 +534,11 @@
       + '<path d="M2.5 5.5 12 3l9.5 2.5M4.5 5v16M19.5 5v16M3 21h18"/><rect x="7" y="8" width="7.5" height="9" rx="1"/><path d="M17 8.5v3.5M17 14.5h.01"/></g>', 44),
   };
   // joyning slayd-rasmlari (hozircha bilbordlarda): kichik nusxa ro'yxat va panelda, kattasi rasm ko'rish oynasida
-  const AD_IMG = 'assets/img/billboards/';
-  const adThumb = (file) => AD_IMG + file.replace(/\.webp$/, '-sm.webp');
-  const adSlides = (p) => (p.photos || []).map((file) => ({ src: AD_IMG + file, cat: 'outdoor', w: 1600, h: 900, uz: p.uz, ru: p.ru, en: p.en }));
+  // har bir tur rasmlari o'z papkasida: bilbordlar — billboards/, LED ekran va bekat slaydlari — led/
+  const AD_IMG = { billboard: 'assets/img/billboards/', led: 'assets/img/led/', stop: 'assets/img/led/' };
+  const adDir = () => AD_IMG[ads.net.id] || AD_IMG.billboard;
+  const adThumb = (file) => adDir() + file.replace(/\.webp$/, '-sm.webp');
+  const adSlides = (p) => (p.photos || []).map((file) => ({ src: adDir() + file, cat: 'outdoor', w: 1600, h: 900, uz: p.uz, ru: p.ru, en: p.en }));
   const ymap = { state: 'idle', map: null };
 
   function loadYmaps() {
@@ -623,13 +625,14 @@
     let desc = adKey('pick');
     if (p) {
       title = tr(p)[0];
-      desc = [tr(p)[1], t('ads.city.' + p.city), p.size ? t('ads.size', { w: p.size[0], h: p.size[1] }) : ''].filter(Boolean).join(' · ');
+      desc = [tr(p)[1], t('ads.city.' + p.city), p.size ? t('ads.size', { w: p.size[0], h: p.size[1] }).replace(/ /g, ' ') : ''].filter(Boolean).join(' · ');
     } else if (!ads.net.items.length) {
       title = t('ads.tab.' + ads.net.id);
       desc = t('ads.empty.title');
     }
     $('#ads-cur-title').textContent = title;
     $('#ads-cur-desc').textContent = desc;
+    renderAdStats(p);
     const photos = $('#ads-photos');
     if (photos) {
       const files = (p && p.photos) || [];
@@ -640,6 +643,61 @@
         </button>`).join('');
     }
     $('#ads-open').setAttribute('href', adsMapUrl(i, false));
+  }
+
+  /* Tanlangan joyning reklama ko'rsatkichlari (LED_slayd_yangi_QR.pdf): har bir raqam yonida
+     uning nimani anglatishi oddiy so'z bilan yoziladi. */
+  const groupNum = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  function renderAdStats(p) {
+    const box = $('#ads-stats');
+    if (!box) return;
+    const s = p && p.stats;
+    const info = p && p.info;
+    const bus = p && ads.net.id === 'bus';
+    box.hidden = !s && !info && !bus;
+    if (!s && !info && !bus) { box.innerHTML = ''; return; }
+    // text — qiymat raqam emas, so'z (ko'cha, mo'ljal): kichikroq shriftda
+    const tile = (ico, label, value, note, text) => `
+      <div class="ads-stat">
+        <span class="ads-stat-head"><span class="ads-stat-ico">${icon(ico)}</span><span class="ads-stat-label">${esc(label)}</span></span>
+        <span class="ads-stat-value${text ? ' is-text' : ''}">${esc(value)}</span>
+        <span class="ads-stat-note">${esc(note)}</span>
+      </div>`;
+    // avtopark: hamkor, manzil, hudud va reklama formati
+    if (bus) {
+      const [name, addr] = tr(p);
+      box.innerHTML = `
+      <p class="ads-stats-title">${esc(t('ads.bus.info.title'))}</p>
+      <div class="ads-stats-grid">
+        ${tile('i-shield', t('ads.bus.info.fleet'), name, t('ads.bus.info.fleet.d'), true)}
+        ${tile('i-pin', t('ads.bus.info.addr'), addr, t('ads.bus.info.addr.d'), true)}
+        ${tile('i-compass', t('ads.bus.info.city'), t('ads.city.' + p.city), t('ads.bus.info.city.d'), true)}
+        ${tile('s-bus', t('ads.bus.info.format'), t('ads.bus.info.format.v'), t('ads.bus.info.format.d'), true)}
+      </div>`;
+      return;
+    }
+    // bilbord (STELLA BILBORD 2025.pptx): ko'cha, mo'ljal, o'lcham va reklama maydoni
+    if (!s) {
+      const L = LANGS.indexOf(lang);
+      const [w, h] = p.size || [6, 3];
+      box.innerHTML = `
+      <p class="ads-stats-title">${esc(t('ads.bb.title'))}</p>
+      <div class="ads-stats-grid">
+        ${tile('i-pin', t('ads.bb.street'), info.street[L] || info.street[0], t('ads.bb.street.d'), true)}
+        ${tile('i-compass', t('ads.bb.spot'), info.spot[L] || info.spot[0], t('ads.bb.spot.d'), true)}
+        ${tile('s-billboard', t('ads.bb.size'), t('ads.size', { w, h }).replace(/ /g, ' '), t('ads.bb.size.d'))}
+        ${tile('i-gem', t('ads.bb.area'), t('ads.bb.area.v', { n: w * h }), t('ads.bb.area.d'))}
+      </div>`;
+      return;
+    }
+    box.innerHTML = `
+      <p class="ads-stats-title">${esc(t('ads.st.title'))}</p>
+      <div class="ads-stats-grid">
+        ${tile('i-eye', t('ads.st.ots'), groupNum(s.ots), t('ads.st.ots.d'))}
+        ${tile('i-team', t('ads.st.reach'), s.reach + '%', t('ads.st.reach.d', { n: s.reach }))}
+        ${tile('i-target', t('ads.st.uni'), groupNum(s.universe), t('ads.st.uni.d'))}
+        ${tile('i-age', t('ads.st.age'), t('ads.st.age.v', { v: s.age }), t('ads.st.age.d'))}
+      </div>`;
   }
 
   function renderAdsTabs() {

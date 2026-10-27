@@ -237,6 +237,26 @@
   .fab-top:hover svg { transform: translateY(-2px); }
   @media (prefers-reduced-motion: reduce) { .fab-call { animation: none; } }
 
+  /* ---------- Footer glowing tagline ---------- */
+  .footer-glow {
+    background: linear-gradient(100deg, #c4a2ff 0%, #ffffff 20%, #ffd86b 40%, #ffffff 60%, #b48cff 80%, #c4a2ff 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: footer-shine 4s linear infinite, footer-glow 2.4s ease-in-out infinite;
+  }
+  @keyframes footer-shine {
+    from { background-position: 0% center; }
+    to { background-position: 200% center; }
+  }
+  @keyframes footer-glow {
+    0%, 100% { filter: drop-shadow(0 0 3px rgba(180, 140, 255, 0.55)); }
+    50% { filter: drop-shadow(0 0 10px rgba(200, 160, 255, 1)) drop-shadow(0 0 18px rgba(255, 216, 107, 0.45)); }
+  }
+  @media (prefers-reduced-motion: reduce) { .footer-glow { animation: none; filter: drop-shadow(0 0 6px rgba(180, 140, 255, 0.7)); } }
+
   /* ---------- Header ---------- */
   .site-header { transition: background-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease; }
   .site-header.is-stuck,
@@ -759,7 +779,35 @@
     @apply absolute bottom-0.5 left-0.5 grid h-4 min-w-4 place-items-center rounded-md bg-brand-950/80 px-1 text-[0.6rem] leading-none text-white;
   }
   .led-item[aria-pressed='true'] .led-thumb span { @apply bg-neon-400 text-brand-950; }
-  .ads-photos { @apply flex gap-2 overflow-x-auto border-t border-white/10 p-3 sm:gap-3 sm:p-4; }
+  /* xarita ostidagi panel: chapda manzil, o'ngda reklama ko'rsatkichlari */
+  /* chap ustun (manzil) vertikal bo'yicha o'rtada turadi */
+  .ads-info { @apply grid gap-4 border-t border-white/10 p-4 sm:p-5 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.6fr)] xl:items-center xl:gap-6; }
+  .ads-stats[hidden] { display: none; }
+  .ads-stats-title { @apply mb-2.5 font-display text-xs font-bold uppercase tracking-[0.14em] text-neon-300; }
+  .ads-stats-grid { @apply grid grid-cols-1 gap-2.5 min-[420px]:grid-cols-2; }
+  /* kartochka: tepada belgi + nom, o'rtada katta raqam, pastda to'liq kenglikdagi izoh */
+  .ads-stat {
+    @apply flex flex-col rounded-2xl border border-white/10 bg-brand-950/40 p-3.5;
+    transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .ads-stat:hover {
+    @apply border-neon-300 bg-neon-500/20;
+    transform: translateY(-3px);
+    box-shadow: 0 0 0 1px rgba(210, 184, 255, 0.35), 0 0 28px rgba(154, 92, 255, 0.55);
+  }
+  .ads-stat-head { @apply flex items-center gap-2; }
+  .ads-stat-ico {
+    @apply grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-white/15 bg-white/10 text-neon-300;
+    transition: all 0.25s ease;
+  }
+  .ads-stat:hover .ads-stat-ico { @apply border-neon-300 bg-neon-400 text-brand-950; box-shadow: 0 0 14px rgba(180, 140, 255, 0.8); }
+  .ads-stat-ico svg { @apply h-4 w-4; }
+  .ads-stat-label { @apply text-[0.72rem] font-bold uppercase tracking-wide text-brand-100/80; }
+  .ads-stat-value { @apply mt-2 block font-display text-2xl font-extrabold leading-none text-white; }
+  .ads-stat-value.is-text { @apply text-base leading-snug; }
+  .ads-stat:hover .ads-stat-value { text-shadow: 0 0 18px rgba(180, 140, 255, 0.8); }
+  .ads-stat-note { @apply mt-1.5 block text-[0.8rem] leading-snug text-brand-100/85; }
+  .ads-photos { @apply flex gap-2 overflow-x-auto pb-1 sm:gap-3; }
   .ads-photos[hidden] { display: none; }
   .ads-photo {
     @apply w-40 shrink-0 overflow-hidden rounded-xl border border-white/15 sm:w-48;
