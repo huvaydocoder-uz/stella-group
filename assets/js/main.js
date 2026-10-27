@@ -46,8 +46,18 @@
       });
     });
     document.title = t('meta.title');
-    const desc = $('meta[name="description"]');
-    if (desc) desc.setAttribute('content', t('meta.desc'));
+    // SEO va ulashish teglari joriy tilga moslanadi
+    const metas = {
+      'meta[name="description"]': 'meta.desc',
+      'meta[name="keywords"]': 'meta.keywords',
+      'meta[property="og:title"]': 'meta.og.title',
+      'meta[property="og:description"]': 'meta.og.desc',
+      'meta[name="twitter:title"]': 'meta.og.title',
+      'meta[name="twitter:description"]': 'meta.og.desc',
+    };
+    Object.keys(metas).forEach((sel) => { const m = $(sel); if (m) m.setAttribute('content', t(metas[sel])); });
+    const loc = $('meta[property="og:locale"]');
+    if (loc) loc.setAttribute('content', MAP_LANG[lang]);
   }
 
   function setLang(next, persist) {
@@ -151,19 +161,23 @@
   const menuBtn = $('#menu-toggle');
   const menu = $('#mobile-menu');
   const fab = $('#fab-call');
+  const fabTop = $('#fab-top');
 
   function onScroll() {
     const y = window.scrollY;
     header.classList.toggle('is-stuck', y > 12);
+    // birinchi sahna (kechki chorraha) har doim to'q — uning ustida header kunduzgi rejimda ham to'q ranglarda turadi
+    const scene = $('#scene');
+    header.classList.toggle('theme-dark', !!scene && scene.getBoundingClientRect().bottom > header.offsetHeight);
+    // birinchi sahnadan pastga tushilganda chiqadi
+    const below = y > (($('#scene') || {}).offsetHeight || 520) * 0.8;
     if (fab) {
-      // ariza formasi ko'ringanda tugma formani to'sib qo'ymasligi uchun yashiriladi
+      // telefonda ariza formasi ko'ringanda tugma formani to'sib qo'ymasligi uchun yashiriladi
       const contact = $('#contact');
-      const atContact = contact && contact.getBoundingClientRect().top < window.innerHeight * 0.7;
-      const show = y > 520 && !atContact;
-      fab.classList.toggle('translate-y-24', !show);
-      fab.classList.toggle('opacity-0', !show);
-      fab.classList.toggle('pointer-events-none', !show);
+      const atContact = window.innerWidth < 640 && contact && contact.getBoundingClientRect().top < window.innerHeight * 0.7;
+      fab.classList.toggle('is-hidden', !below || atContact);
     }
+    if (fabTop) fabTop.classList.toggle('is-hidden', !below);
   }
 
   function setMenu(open) {
@@ -380,25 +394,103 @@
     });
   }
 
+  /* Mijozlar lentalari: o'z yo'nalishida yuradi, kursor ustida to'xtaydi, sichqonchaning chap tugmasi yoki
+     barmoq bilan ikki tomonga suriladi (LED yugurma satri bilan bir xil mantiq). */
+  function initClientMarquees() {
+    if (reduceMotion) return;
+    $$('#clients .marquee').forEach((wrap) => {
+      const el = $('.marquee-track', wrap);
+      if (!el) return;
+      // animate-marquee-rev — chapdan o'ngga, animate-marquee — o'ngdan chapga
+      const dir = el.classList.contains('animate-marquee-rev') ? 1 : -1;
+      const loop = parseFloat(el.style.getPropertyValue('--marquee-time')) || 70;
+      el.classList.remove('animate-marquee', 'animate-marquee-rev');
+      wrap.classList.add('is-draggable');
+      const s = { x: 0, period: 0, hover: false, drag: false, last: 0 };
+      const measure = () => { s.period = el.scrollWidth / 2; };
+      measure();
+      window.addEventListener('resize', measure);
+      $$('img', el).forEach((img) => { if (!img.complete) img.addEventListener('load', measure, { once: true }); });
+
+      let startX = 0;
+      let startOffset = 0;
+      wrap.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') s.hover = true; });
+      wrap.addEventListener('pointerleave', () => { s.hover = false; });
+      wrap.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        s.drag = true;
+        startX = e.clientX;
+        startOffset = s.x;
+        wrap.classList.add('is-dragging');
+        try { wrap.setPointerCapture(e.pointerId); } catch (err) { /* eski brauzer */ }
+      });
+      wrap.addEventListener('pointermove', (e) => { if (s.drag) s.x = startOffset + (e.clientX - startX); });
+      const endDrag = () => { s.drag = false; wrap.classList.remove('is-dragging'); };
+      wrap.addEventListener('pointerup', endDrag);
+      wrap.addEventListener('pointercancel', endDrag);
+      wrap.addEventListener('dragstart', (e) => e.preventDefault());
+
+      const frame = (now) => {
+        const dt = s.last ? Math.min(now - s.last, 100) : 0;
+        s.last = now;
+        if (s.period > 0) {
+          if (!s.hover && !s.drag) s.x += dir * (s.period / loop) * (dt / 1000);
+          // cheksiz aylanish: siljishni (-period, 0] oralig'ida ushlab turamiz
+          const x = ((s.x % s.period) - s.period) % s.period;
+          el.style.transform = `translate3d(${x}px,0,0)`;
+        }
+        requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    });
+  }
+
   /* ---------------- reklama joylari: tur → manzil → Yandex xarita ---------------- */
   // service — "Reklama berish" tugmasi bosilganda formada tanlanadigan xizmat
   const NETS = [
     { id: 'led', icon: 's-led', service: 'led', items: window.STELLA_LED || [] },
     { id: 'billboard', icon: 's-billboard', service: 'billboard', items: window.STELLA_BILLBOARDS || [] },
-    { id: 'bus', icon: 's-bus', service: 'transport', items: window.STELLA_BUS || [] },
+    // dot — xaritadagi aylana nuqta rangi (berilmasa binafsha)
+    { id: 'bus', icon: 's-bus', service: 'transport', items: window.STELLA_BUS || [], dot: '#16a34a' },
     { id: 'stop', icon: 's-stop', service: 'other', items: window.STELLA_STOPS || [] },
   ];
+  /* Bir joyda bir nechta konstruksiya bo'lishi mumkin (masalan, chorrahadagi 2–4 ta bilbord) va ularning
+     koordinatalari deyarli bir xil. Xaritada har biri alohida ko'rinishi uchun bir-biriga 12 m dan yaqin
+     nuqtalar guruh markazi atrofida aylana bo'ylab bir oz suriladi. */
+  function spreadPoints(items) {
+    const M = 111320;
+    const pos = items.map((p) => p.ll);
+    const used = new Set();
+    items.forEach((p, i) => {
+      if (used.has(i)) return;
+      const k = Math.cos((p.ll[0] * Math.PI) / 180);
+      const group = items.map((_, j) => j).filter((j) => !used.has(j)
+        && Math.hypot((items[j].ll[0] - p.ll[0]) * M, (items[j].ll[1] - p.ll[1]) * M * k) < 12);
+      group.forEach((j) => used.add(j));
+      if (group.length < 2) return;
+      const lat = group.reduce((s, j) => s + items[j].ll[0], 0) / group.length;
+      const lon = group.reduce((s, j) => s + items[j].ll[1], 0) / group.length;
+      const r = 10 + group.length * 3; // metr
+      group.forEach((j, n) => {
+        const a = (2 * Math.PI * n) / group.length - Math.PI / 2;
+        pos[j] = [lat + (r * Math.cos(a)) / M, lon + (r * Math.sin(a)) / (M * k)];
+      });
+    });
+    return pos;
+  }
+  NETS.forEach((n) => { n.pos = spreadPoints(n.items); });
+
   const ads = { net: NETS[0], index: -1 };
-  const adPoint = (p) => `${p.ll[1]},${p.ll[0]}`;
+  const adLL = (i) => ads.net.pos[i];
+  const adPoint = (ll) => `${ll[1].toFixed(6)},${ll[0].toFixed(6)}`;
   const adKey = (k) => t(`ads.${ads.net.id}.${k}`);
 
-  function adsMapUrl(p, embed) {
+  function adsMapUrl(i, embed) {
     const base = embed ? 'https://yandex.uz/map-widget/v1/' : 'https://yandex.uz/maps/';
     const items = ads.net.items;
-    // bir nuqtada bir nechta joy bo'lishi mumkin — umumiy ko'rinishda takrorlanmaydi
-    const pts = Array.from(new Set(items.map(adPoint)));
+    const pts = Array.from(new Set(ads.net.pos.map(adPoint)));
     let q;
-    if (p) q = `ll=${adPoint(p)}&z=17&pt=${adPoint(p)},pm2vvl`;
+    if (items[i]) q = `ll=${adPoint(adLL(i))}&z=17&pt=${adPoint(adLL(i))},pm2vvl`;
     else if (!pts.length) q = 'll=64.4286,39.7747&z=12';
     else {
       const lat = items.map((x) => x.ll[0]);
@@ -424,6 +516,23 @@
     billboard: { href: 'assets/img/billboard-pin.png', w: 100, h: 128 },
     stop: { href: 'assets/img/stop-pin.png', w: 220, h: 94 },
   };
+  /* Xaritadagi aylana belgilar (tanlanmagan joylar): LED — binafsha, ichida "L"; bilbord — oq, qora gardish,
+     ichida "B"; avtobus — yashil, ichida "A"; bekat — kattaroq, qizil, ichida bekat (soyabon) belgisi.
+     SVG data URL ko'rinishida — alohida fayl kerak emas. Hamma belgilar 30×30 chizilib, size bilan kattalashtiriladi. */
+  const markSvg = (fill, stroke, inner, size) => ({
+    size: size || 30,
+    href: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${size || 30}" height="${size || 30}" viewBox="0 0 30 30">`
+      + `<circle cx="15" cy="15" r="13" fill="${fill}" stroke="${stroke}" stroke-width="2.5"/>${inner}</svg>`),
+  });
+  const markText = (ch, color) => `<text x="15" y="20.2" text-anchor="middle" font-family="Montserrat,Arial,sans-serif" font-size="14" font-weight="800" fill="${color}">${ch}</text>`;
+  const MARKS = {
+    led: markSvg('#b51eff', '#fff', markText('L', '#fff')),
+    billboard: markSvg('#fff', '#111', markText('B', '#111')),
+    bus: markSvg('#16a34a', '#fff', markText('A', '#fff')),
+    stop: markSvg('#e11d48', '#fff', '<g transform="translate(6 6) scale(.75)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'
+      + '<path d="M2.5 5.5 12 3l9.5 2.5M4.5 5v16M19.5 5v16M3 21h18"/><rect x="7" y="8" width="7.5" height="9" rx="1"/><path d="M17 8.5v3.5M17 14.5h.01"/></g>', 44),
+  };
   // joyning slayd-rasmlari (hozircha bilbordlarda): kichik nusxa ro'yxat va panelda, kattasi rasm ko'rish oynasida
   const AD_IMG = 'assets/img/billboards/';
   const adThumb = (file) => AD_IMG + file.replace(/\.webp$/, '-sm.webp');
@@ -442,15 +551,21 @@
       if (!window.ymaps) { ymap.state = 'failed'; return; }
       window.ymaps.ready(() => {
         const el = $('#ads-ymap');
+        const frame = $('#ads-map');
+        // xarita ko'rinib turgan konteynerda yaratilishi kerak — aks holda o'lchami 0 bo'lib, nuqtalar oynasi dunyo ko'rinishida ochiladi
+        el.hidden = false;
+        frame.hidden = true;
         try {
           ymap.map = new window.ymaps.Map(el, { center: BUKHARA, zoom: 12, controls: ['zoomControl', 'fullscreenControl'] }, { suppressMapOpenBlock: true });
-        } catch (err) { ymap.state = 'failed'; return; }
+        } catch (err) {
+          ymap.state = 'failed';
+          el.hidden = true;
+          frame.hidden = false;
+          return;
+        }
         // sahifani aylantirganda xarita kattalashib ketmasin
         ymap.map.behaviors.disable('scrollZoom');
         ymap.state = 'ready';
-        el.hidden = false;
-        const frame = $('#ads-map');
-        frame.hidden = true;
         frame.removeAttribute('src');
         drawYmap();
       });
@@ -465,22 +580,30 @@
     const items = ads.net.items;
     const sel = items[ads.index];
     map.geoObjects.removeAll();
-    // bir nuqtada bir nechta joy bo'lishi mumkin — har nuqtaga bitta belgi
-    const seen = new Set(sel ? [adPoint(sel)] : []);
+    // har bir joyga alohida belgi (yaqin joylar spreadPoints bilan bir-biridan ajratilgan)
     items.forEach((p, i) => {
-      if (seen.has(adPoint(p))) return;
-      seen.add(adPoint(p));
-      const mark = new Y.Placemark(p.ll, { hintContent: tr(p)[0] }, { preset: 'islands#violetCircleDotIcon' });
+      if (i === ads.index) return;
+      const m = MARKS[ads.net.id];
+      const dot = m
+        ? { iconLayout: 'default#image', iconImageHref: m.href, iconImageSize: [m.size, m.size], iconImageOffset: [-m.size / 2, -m.size / 2] }
+        : ads.net.dot
+          ? { preset: 'islands#circleDotIcon', iconColor: ads.net.dot }
+          : { preset: 'islands#violetCircleDotIcon' };
+      const mark = new Y.Placemark(adLL(i), { hintContent: tr(p)[0] }, dot);
       mark.events.add('click', () => showAd(i));
       map.geoObjects.add(mark);
     });
     if (sel) {
-      const pin = PINS[ads.net.id];
+      // joyning o'z rasmi bo'lsa (masalan, avtoparkning avtobusi) — o'shani, aks holda tur belgisi
+      const pin = sel.pin
+        ? { href: 'assets/img/buses/' + sel.pin[0], w: sel.pin[1], h: sel.pin[2] }
+        : PINS[ads.net.id];
       const opts = pin
         ? { iconLayout: 'default#image', iconImageHref: pin.href, iconImageSize: [pin.w, pin.h], iconImageOffset: [-pin.w / 2, -pin.h], zIndex: 1000 }
         : { preset: 'islands#violetDotIcon', zIndex: 1000 };
-      map.geoObjects.add(new Y.Placemark(sel.ll, { hintContent: tr(sel)[0] }, opts));
-      map.setCenter(sel.ll, 16, { duration: 300 });
+      map.geoObjects.add(new Y.Placemark(adLL(ads.index), { hintContent: tr(sel)[0] }, opts));
+      // yonida boshqa konstruksiyalar bo'lsa, ular ajralib ko'rinishi uchun yaqinroq
+      map.setCenter(adLL(ads.index), adLL(ads.index) === sel.ll ? 16 : 18, { duration: 300 });
     } else if (items.length > 1) {
       map.setBounds(map.geoObjects.getBounds(), { checkZoomRange: true, zoomMargin: 40, duration: 300 });
     } else {
@@ -493,7 +616,7 @@
     const p = ads.net.items[i];
     $$('#ads-list .led-item').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.getAttribute('data-ad')) === i)));
     const map = $('#ads-map');
-    const src = adsMapUrl(p, true);
+    const src = adsMapUrl(i, true);
     if (ymap.state === 'ready') drawYmap();
     else if (map && map.getAttribute('src') !== src) map.setAttribute('src', src);
     let title = adKey('all');
@@ -516,7 +639,7 @@
           <img src="${esc(adThumb(file))}" alt="${esc(tr(p)[0] + ' — ' + t('ads.photo', { n: k + 1 }))}" width="320" height="180" loading="lazy" decoding="async">
         </button>`).join('');
     }
-    $('#ads-open').setAttribute('href', adsMapUrl(p, false));
+    $('#ads-open').setAttribute('href', adsMapUrl(i, false));
   }
 
   function renderAdsTabs() {
@@ -1018,6 +1141,7 @@
     initIntro();
     initHero();
     renderClients();
+    initClientMarquees();
     setLang(lang, false);
     initTicker();
     initAds();

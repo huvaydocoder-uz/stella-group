@@ -205,6 +205,38 @@
     box-shadow: inset 0 1px 0 rgb(var(--c-white) /0.12);
   }
 
+  /* ---------- Suzuvchi tugmalar: chapda qo'ng'iroq, o'ngda tepaga qaytish ---------- */
+  .fab {
+    @apply fixed bottom-5 z-40 grid h-14 w-14 place-items-center rounded-full sm:bottom-7;
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.5s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+  }
+  .fab.is-hidden { @apply pointer-events-none opacity-0; transform: translateY(6rem); }
+  .fab-call {
+    @apply left-5 bg-white text-brand-700 sm:left-7;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8), 0 0 30px rgba(180, 140, 255, 0.8), 0 14px 34px -8px rgba(10, 4, 24, 0.9);
+    animation: fab-glow 2.4s ease-in-out infinite;
+  }
+  .fab-call:hover { transform: scale(1.08); }
+  @keyframes fab-glow {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8), 0 0 18px rgba(180, 140, 255, 0.6), 0 14px 34px -8px rgba(10, 4, 24, 0.9); }
+    50% { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9), 0 0 40px rgba(180, 140, 255, 1), 0 14px 34px -8px rgba(10, 4, 24, 0.9); }
+  }
+  .fab-top {
+    @apply right-5 border border-neon-300/60 text-neon-300 sm:right-7;
+    background-color: rgb(var(--b-900) / 0.75);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 22px rgba(154, 92, 255, 0.45), 0 14px 34px -10px rgb(var(--shadow) / 0.8);
+  }
+  .fab-top:hover {
+    @apply border-neon-300 bg-neon-400 text-white;
+    transform: translateY(-4px);
+    box-shadow: 0 0 32px rgba(180, 140, 255, 0.9), 0 18px 34px -10px rgb(var(--shadow) / 0.8);
+  }
+  .fab-top svg { transition: transform 0.3s ease; }
+  .fab-top:hover svg { transform: translateY(-2px); }
+  @media (prefers-reduced-motion: reduce) { .fab-call { animation: none; } }
+
   /* ---------- Header ---------- */
   .site-header { transition: background-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease; }
   .site-header.is-stuck,
@@ -260,7 +292,8 @@
   /* tor telefonlarda faqat bayroqchalar qoladi */
   @media (max-width: 419.98px) {
     .lang-code { display: none; }
-    .lang-switch button { @apply px-1.5 py-1.5; }
+    /* barmoq bilan bosish uchun balandligi kamida 32 px (kengligi tor ekranga sig'ishi uchun cheklanmagan) */
+    .lang-switch button { @apply min-h-[2rem] px-1.5 py-1.5; }
   }
   @media (max-width: 359.98px) {
     .flag { @apply h-3.5 w-3.5; }
@@ -656,6 +689,16 @@
     width: max-content;
   }
   .marquee:hover .marquee-track { animation-play-state: paused; }
+  /* sichqoncha (chap tugma) yoki barmoq bilan suriladigan lenta (JS: initClientMarquees) */
+  .marquee.is-draggable {
+    cursor: grab;
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .marquee.is-draggable .marquee-track { will-change: transform; }
+  .marquee.is-dragging { cursor: grabbing; }
+  .marquee.is-dragging .client-card { pointer-events: none; }
   /* ---------- Reklama joylari: tur va manzil tanlash ---------- */
   .ads-tabs { @apply grid grid-cols-2 gap-2; }
   .ads-tab {
